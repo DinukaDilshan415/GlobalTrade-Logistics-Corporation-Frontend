@@ -1,1 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo:ital,wght@0,100..900;1,100..900&family=Quicksand:wght@300..700&display=swap');
 @import "tailwindcss";
+@theme {
+  --color-primary: #1e40af;
+  --color-accent: #10b981;
+  --color-globlePrimary: #0096ed;
+
+  --color-globleSecondary: #b2d235; 
+
+  --color-globleHover: #1d7ebf;
+  --color-globleBlack: #161e24;
+}
+
+
+*{
+  font-family: "Exo", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
