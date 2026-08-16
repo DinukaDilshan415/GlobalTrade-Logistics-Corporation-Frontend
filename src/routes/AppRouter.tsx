@@ -1,6 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Login from "../components/login/Login";
 import Home from "../components/Home";
+import { TrackingDetails } from "../components/Tracking/TrackingDetails";
+import AdminLogin from "../components/Admin/AdminLogin";
+import AdminDashboard from "../components/Admin/AdminDashboard";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +17,18 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Home
+  },
+  {
+    path: "/tracking",
+    Component: TrackingDetails
+  },
+  {
+    path: "/admin/login",
+    Component: AdminLogin
+  },
+  {
+    path: "/admin/dashboard",
+    Component: AdminDashboard
   },
 
 ]);

@@ -25,31 +25,31 @@ export const HomePage: React.FC = () => {
       {/* 1. Header */}
       <Header />
 
-      <main className="flex-grow">
+      <main className="grow">
         {/* 2. Hero Section */}
         <div className="relative">
           {/* Background image & gradient overlay */}
           <div 
-            className="relative h-[480px] sm:h-[520px] md:h-[560px] w-full bg-cover bg-center overflow-hidden"
+            className="relative h-120 sm:h-130 md:h-140 w-full bg-cover bg-center overflow-hidden"
             style={{
               backgroundImage: `url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=2000&auto=format&fit=crop')`,
             }}
           >
             {/* Smooth gradient scrim for high readability */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-slate-900/30 backdrop-blur-[0.5px]" />
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-900/40 to-slate-900/30 backdrop-blur-[0.5px]" />
 
             {/* Hero Main Content */}
             <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center items-center text-center -mt-10">
               
               {/* Badge Tag */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[#b2d235] text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm animate-fade-in">
-                <Sparkles className="w-3.5 h-3.5 text-[#b2d235]" />
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-globleSecondary text-xs font-semibold uppercase tracking-wider mb-4 shadow-sm animate-fade-in">
+                <Sparkles className="w-3.5 h-3.5 text-globleSecondary" />
                 Next-Gen Delivery Network
               </div>
 
               {/* Hero Title */}
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-md">
-                Track Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-blue-200">Shipment</span>
+                Track Your <span className="text-transparent bg-clip-text bg-linear-to-r from-white via-white to-blue-200">Shipment</span>
               </h1>
               <p className="mt-3 text-sm sm:text-base text-slate-200 max-w-xl font-normal drop-shadow">
                 Enter your consignment or tracking ID to view real-time location & estimated delivery time.
@@ -117,7 +117,7 @@ export const HomePage: React.FC = () => {
                 className="group relative bg-white rounded-2xl p-7 shadow-lg hover:shadow-2xl border border-slate-100 transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between cursor-pointer"
               >
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-[#b2d235]/20 text-lime-700 flex items-center justify-center mb-5 group-hover:bg-[#b2d235] group-hover:text-slate-900 transition-colors duration-300">
+                  <div className="w-14 h-14 rounded-2xl bg-globleSecondary/20 text-lime-700 flex items-center justify-center mb-5 group-hover:bg-globleSecondary group-hover:text-slate-900 transition-colors duration-300">
                     <FileText className="w-7 h-7 stroke-[1.8]" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 group-hover:text-lime-700 transition-colors">
@@ -140,12 +140,12 @@ export const HomePage: React.FC = () => {
                 className="group relative bg-white rounded-2xl p-7 shadow-lg hover:shadow-2xl border-2 border-globlePrimary/20 transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col justify-between overflow-hidden cursor-pointer"
               >
                 {/* Corner Accent Badge */}
-                <div className="absolute -top-10 -right-10 w-20 h-20 bg-[#b2d235] rotate-45 flex items-end justify-center pb-1 shadow-sm">
+                <div className="absolute -top-10 -right-10 w-20 h-20 bg-globleSecondary rotate-45 flex items-end justify-center pb-1 shadow-sm">
                   <span className="text-[9px] font-black text-slate-900 tracking-wider">PRO</span>
                 </div>
 
                 <div>
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-globlePrimary to-[#b2d235] text-white flex items-center justify-center mb-5 shadow-md shadow-globlePrimary/20">
+                  <div className="w-14 h-14 rounded-2xl bg-linear-to-tr from-globlePrimary to-globleSecondary text-white flex items-center justify-center mb-5 shadow-md shadow-globlePrimary/20">
                     <Building2 className="w-7 h-7 stroke-[1.8]" />
                   </div>
                   <h3 className="text-xl font-bold text-slate-900 group-hover:text-globlePrimary transition-colors">
@@ -181,8 +181,8 @@ export const HomePage: React.FC = () => {
                 alt="Express Delivery" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
-                <span className="text-xs font-bold text-[#b2d235] uppercase tracking-wider">Same Day & Next Day</span>
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
+                <span className="text-xs font-bold text-globleSecondary uppercase tracking-wider">Same Day & Next Day</span>
                 <h4 className="text-xl font-bold text-white mt-1">E-Commerce & Express Courier</h4>
               </div>
             </div>
@@ -193,7 +193,7 @@ export const HomePage: React.FC = () => {
                 alt="Freight Cargo" 
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
+              <div className="absolute inset-0 bg-linear-to-t from-slate-950/80 via-slate-950/20 to-transparent p-6 flex flex-col justify-end">
                 <span className="text-xs font-bold text-globlePrimary uppercase tracking-wider">Global Solutions</span>
                 <h4 className="text-xl font-bold text-white mt-1">Air & Ocean Freight Forwarding</h4>
               </div>
