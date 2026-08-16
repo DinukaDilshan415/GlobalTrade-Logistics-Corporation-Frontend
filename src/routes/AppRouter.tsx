@@ -4,6 +4,7 @@ import Home from "../components/Home";
 import { TrackingDetails } from "../components/Tracking/TrackingDetails";
 import AdminLogin from "../components/Admin/AdminLogin";
 import AdminDashboard from "../components/Admin/AdminDashboard";
+import Test from "../components/Test";
 
 const router = createBrowserRouter([
   {
@@ -17,6 +18,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Home
+  },
+  {
+    path: "/test",
+    Component: Test
   },
   {
     path: "/tracking",
