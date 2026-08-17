@@ -121,6 +121,8 @@ export const LoginPage: React.FC = () => {
         toast.success(json.message);
         setFormData(INITIAL_FORM_DATA);
 
+        window.location.replace('/');
+
       } else if (response.status == 400) {
         toast.error(json.message);
       } else if (response.status == 401) {
