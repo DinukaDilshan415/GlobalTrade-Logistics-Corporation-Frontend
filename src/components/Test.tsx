@@ -1,25 +1,38 @@
+﻿import { useAuth } from "./context/AuthContext";
 
 function Test() {
-
+    const { token } = useAuth();
     const handleSubmit = async () => {
         const user = {
             "username": "testuser",
             "password": "1234"
         };
 
+        console.log("Token on Test fuction : "+token);
+
         try {
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+            };
+
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            } else {
+                console.warn('No auth token available; request will be sent without Authorization header');
+            }
+
             const response = await fetch('http://localhost:8080/globaltrade-logistics-corporation/api/test', {
                 method: "POST",
                 credentials: "include",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers,
                 body: JSON.stringify(user)
             });
 
             if (response.ok) {
                 const json = await response.json();
                 console.log(json);
+            } else {
+                console.warn('Test request failed', response.status, response.statusText);
             }
         } catch (error) {
             console.error('Error during test submission:', error);

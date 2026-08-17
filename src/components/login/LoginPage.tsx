@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from '../../api/client';
 import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 type AuthMode = 'login' | 'register';
 type AccountType = 'customer' | 'customs_agent';
@@ -23,6 +24,7 @@ type AccountType = 'customer' | 'customs_agent';
 export const LoginPage: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const { setToken } = useAuth();
 
   const INITIAL_FORM_DATA = {
     username: '',
@@ -115,12 +117,13 @@ export const LoginPage: React.FC = () => {
 
       if (response.ok) {
 
+        setToken(json.accessToken);
         toast.success(json.message);
         setFormData(INITIAL_FORM_DATA);
 
       } else if (response.status == 400) {
         toast.error(json.message);
-      }else if (response.status == 401) {
+      } else if (response.status == 401) {
         toast.error(json.error);
       } else {
         console.log(response);
