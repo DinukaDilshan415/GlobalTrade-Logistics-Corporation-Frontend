@@ -86,19 +86,57 @@ export const LoginPage: React.FC = () => {
         toast.error("Registration failed. Please try again");
       }
     } catch (error) {
-      toast.error("Somwthing Wrong : " + error);
+      toast.error("Something Wrong : " + error);
       console.error("Signup Error:", error);
     }
+  }
+
+  const signin = async () => {
+
+    const user = {
+      "username": "",
+      "email": formData.email,
+      "accountType": "",
+      "password": formData.password
+    }
+
+    try {
+      const response = await fetch(`${GLOBAL_BASE_URL}/auth/user/login`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          ...DEFAULT_HEADERS,
+        },
+        body: JSON.stringify(user)
+      });
+      const json = await response.json();
+
+      console.log(json);
+
+      if (response.ok) {
+
+        toast.success(json.message);
+        setFormData(INITIAL_FORM_DATA);
+
+      } else if (response.status == 400) {
+        toast.error(json.message);
+      }else if (response.status == 401) {
+        toast.error(json.error);
+      } else {
+        console.log(response);
+        toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+      }
+    } catch (error) {
+      toast.error("Something Wrong : " + error);
+      console.error("Error:", error);
+    }
+
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (mode === 'login') {
-      console.log('Login Payload:', {
-        email: formData.email,
-        password: formData.password,
-      });
-      alert(`Logging in with: ${formData.email}`);
+      signin();
     } else {
       register();
     }
