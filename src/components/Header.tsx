@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from './context/AuthContext';
 import { 
   ChevronDown, 
   User, 
@@ -19,7 +20,14 @@ export const Header: React.FC = () => {
   
   const accountRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown on outside click
+  const { token, setToken } = useAuth();
+
+  const handleLogout = () => {
+    setToken(null);
+    setIsAccountOpen(false);
+    setMobileMenuOpen(false);
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
@@ -155,22 +163,36 @@ export const Header: React.FC = () => {
 
           <div className="h-5 w-px bg-slate-200 mx-1" />
 
-          {/* Log In Button */}
-          <a
-            href="/login"
-            className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:text-globlePrimary hover:bg-slate-100 rounded-full transition-all"
-          >
-            <User className="h-4 w-4" />
-            <span>Log In</span>
-          </a>
+          {/* Auth action buttons: show Logout when authenticated, otherwise Log In / Sign Up */}
+          {token ? (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:text-red-600 hover:bg-red-50 rounded-full transition-all"
+              >
+                <User className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </div>
+          ) : (
+            <>
+              <a
+                href="/login"
+                className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:text-globlePrimary hover:bg-slate-100 rounded-full transition-all"
+              >
+                <User className="h-4 w-4" />
+                <span>Log In</span>
+              </a>
 
-          {/* Register / Sign Up (Primary Button with Secondary Accent Glow) */}
-          <a
-            href="/login"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white bg-globlePrimary hover:bg-[#0082ce] shadow-md shadow-globlePrimary/25 hover:shadow-lg transition-all active:scale-95"
-          >
-            <span>Sign Up</span>
-          </a>
+              {/* Register / Sign Up (Primary Button with Secondary Accent Glow) */}
+              <a
+                href="/login"
+                className="flex items-center gap-2 px-5 py-2.5 rounded-full text-white bg-globlePrimary hover:bg-[#0082ce] shadow-md shadow-globlePrimary/25 hover:shadow-lg transition-all active:scale-95"
+              >
+                <span>Sign Up</span>
+              </a>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu Hamburger */}
@@ -207,18 +229,37 @@ export const Header: React.FC = () => {
           </div>
 
           <div className="pt-4 border-t border-slate-100 flex flex-col gap-3">
-            <a 
-              href="#login" 
-              className="w-full py-3 text-center text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
-            >
-              Log In
-            </a>
-            <a 
-              href="#signup" 
-              className="w-full py-3 text-center text-sm font-bold text-white bg-globlePrimary hover:bg-[#0082ce] shadow-md rounded-xl transition-all"
-            >
-              Open an Account
-            </a>
+            {token ? (
+              <>
+                <button
+                  onClick={() => { handleLogout(); }}
+                  className="w-full py-3 text-center text-sm font-bold text-slate-700 bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                >
+                  Logout
+                </button>
+                <a
+                  href="#dashboard"
+                  className="w-full py-3 text-center text-sm font-bold text-white bg-globlePrimary hover:bg-[#0082ce] shadow-md rounded-xl transition-all"
+                >
+                  Dashboard
+                </a>
+              </>
+            ) : (
+              <>
+                <a 
+                  href="#login" 
+                  className="w-full py-3 text-center text-sm font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
+                >
+                  Log In
+                </a>
+                <a 
+                  href="#signup" 
+                  className="w-full py-3 text-center text-sm font-bold text-white bg-globlePrimary hover:bg-[#0082ce] shadow-md rounded-xl transition-all"
+                >
+                  Open an Account
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}
