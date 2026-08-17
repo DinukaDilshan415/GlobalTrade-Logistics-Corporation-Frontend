@@ -20,10 +20,14 @@ export const Header: React.FC = () => {
   
   const accountRef = useRef<HTMLDivElement>(null);
 
-  const { token, setToken } = useAuth();
+  const { token, logout } = useAuth();
 
-  const handleLogout = () => {
-    setToken(null);
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (e) {
+      console.warn('Error during logout', e);
+    }
     setIsAccountOpen(false);
     setMobileMenuOpen(false);
   };

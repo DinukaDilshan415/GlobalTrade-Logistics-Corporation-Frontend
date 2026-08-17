@@ -1,15 +1,16 @@
-import { createContext, useContext, useState, } from "react";
+import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import { GLOBAL_BASE_URL, DEFAULT_HEADERS } from "../../api/client";
 
 interface AuthContextType {
   token: string | null;
   setToken: (token: string | null) => void;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-
   const [token, setTokenState] = useState<string | null>(() => {
     try {
       return localStorage.getItem('token');
@@ -32,8 +33,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const logout = async () => {
+
+    try {
+      await fetch(`${GLOBAL_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: DEFAULT_HEADERS,
+        body: token
+      });
+    } catch (e) {
+      console.warn('Logout request failed', e);
+    } finally {
+      setToken(null);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ token, setToken }}>
+    <AuthContext.Provider value={{ token, setToken, logout }}>
       {children}
     </AuthContext.Provider>
   );
