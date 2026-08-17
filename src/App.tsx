@@ -1,11 +1,14 @@
 import { Bounce, ToastContainer } from "react-toastify"
 import AppRouter from "./routes/AppRouter"
+import { AuthProvider } from "./components/context/AuthContext"
 
 function App() {
 
   return (
     <>
-      <AppRouter />
+      <AuthProvider>
+        <AppRouter />
+      </AuthProvider>
       <ToastContainer
         position="top-right"
         autoClose={5000}
