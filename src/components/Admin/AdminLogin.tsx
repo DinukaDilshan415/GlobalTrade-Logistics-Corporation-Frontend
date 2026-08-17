@@ -8,6 +8,9 @@ import {
     ArrowRight,
     Server
 } from 'lucide-react';
+import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from '../../api/client';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 
 export const AdminLogin: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -15,18 +18,63 @@ export const AdminLogin: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
+    const { setToken } = useAuth();
+
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
         if (!username || !password) return;
 
         setIsLoading(true);
-        // Simulate API call
         setTimeout(() => {
-            console.log('Admin Authentication Attempt:', { username });
-            alert(`Authenticating internal user: ${username}`);
+
+            signin();
+
             setIsLoading(false);
         }, 1200);
     };
+
+    const signin = async () => {
+
+        const user = {
+            "username": username,
+            "password": password,
+            "role": "",
+        }
+
+        try {
+            const response = await fetch(`${GLOBAL_BASE_URL}/auth/admin/login`, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    ...DEFAULT_HEADERS,
+                },
+                body: JSON.stringify(user)
+            });
+            const json = await response.json();
+
+            console.log(json);
+
+            if (response.ok) {
+
+                setToken(json.accessToken);
+                toast.success(json.message);
+
+                window.location.replace('/admin/dashboard');
+
+            } else if (response.status == 400) {
+                toast.error(json.message);
+            } else if (response.status == 401) {
+                toast.error(json.error);
+            } else {
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+            }
+        } catch (error) {
+            toast.error("Something Wrong : " + error);
+            console.error("Error:", error);
+        }
+
+    }
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-slate-950 font-sans antialiased relative overflow-hidden p-4 sm:p-6">
