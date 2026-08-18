@@ -24,7 +24,7 @@ type AccountType = 'customer' | 'customs_agent';
 export const LoginPage: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('login');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const { setToken } = useAuth();
+  const { setAuth } = useAuth();
 
   const INITIAL_FORM_DATA = {
     username: '',
@@ -117,7 +117,7 @@ export const LoginPage: React.FC = () => {
 
       if (response.ok) {
 
-        setToken(json.accessToken);
+        setAuth(json.accessToken, json.roles);
         toast.success(json.message);
         setFormData(INITIAL_FORM_DATA);
 

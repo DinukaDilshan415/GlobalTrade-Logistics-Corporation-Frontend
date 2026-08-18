@@ -1,14 +1,37 @@
-﻿import { useAuth } from "./context/AuthContext";
+﻿import { GLOBAL_BASE_URL } from "../api/client";
+import { useAuth } from "./context/AuthContext";
 
 function Test() {
-    const { token } = useAuth();
+    const { token, setAuth } = useAuth();
+
+    const tryRefresh = async () => {
+        try {
+            const response = await fetch(`${GLOBAL_BASE_URL}/auth/refresh`, {
+                method: "POST",
+                credentials: "include",
+            });
+            if (response.ok) {
+                const json = await response.json();
+                console.log(json);
+                setAuth(json.accessToken, json.roles);
+            } else if (response.status === 401) {
+                setAuth(null, []);
+                window.location.href = "/login";
+            } else {
+                
+            }
+        } catch {
+            // no valid session, stay logged out
+        }
+    };
+
     const handleSubmit = async () => {
         const user = {
             "username": "testuser",
             "password": "1234"
         };
 
-        console.log("Token on Test fuction : "+token);
+        console.log("Token on Test fuction : " + token);
 
         try {
             const headers: Record<string, string> = {
@@ -31,6 +54,8 @@ function Test() {
             if (response.ok) {
                 const json = await response.json();
                 console.log(json);
+            } else if (response.status === 401) {
+                tryRefresh
             } else {
                 console.warn('Test request failed', response.status, response.statusText);
             }
