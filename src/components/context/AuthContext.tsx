@@ -1,10 +1,12 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { GLOBAL_BASE_URL, DEFAULT_HEADERS } from "../../api/client";
 
 interface AuthContextType {
   token: string | null;
-  setToken: (token: string | null) => void;
+  roles: string[];
+  isLoading: boolean;
+  setAuth: (token: string | null, roles?: string[]) => void;
   logout: () => Promise<void>;
 }
 
@@ -20,13 +22,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const setToken = (token: string | null) => {
+  const [roles, setRolesState] = useState<string[]>(() => {
+    try {
+      const storedRoles = localStorage.getItem('roles');
+      if (!storedRoles) return [];
+      const parsedRoles = JSON.parse(storedRoles);
+      return Array.isArray(parsedRoles) ? parsedRoles : [parsedRoles].filter(Boolean);
+    } catch (e) {
+      console.warn('Could not read roles from localStorage', e);
+      return [];
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const setAuth = (token: string | null, roles?: string[]) => {
     setTokenState(token);
+    const nextRoles = roles ?? [];
+    setRolesState(nextRoles);
     try {
       if (token) {
         localStorage.setItem('token', token);
+        localStorage.setItem('roles', JSON.stringify(nextRoles));
       } else {
         localStorage.removeItem('token');
+        localStorage.removeItem('roles');
       }
     } catch (e) {
       console.warn('Could not write token to localStorage', e);
@@ -34,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = async () => {
+    setIsLoading(true);
 
     try {
       await fetch(`${GLOBAL_BASE_URL}/auth/logout`, {
@@ -45,12 +66,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } catch (e) {
       console.warn('Logout request failed', e);
     } finally {
-      setToken(null);
+      setAuth(null, []);
+      setIsLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ token, setToken, logout }}>
+    <AuthContext.Provider value={{ token, roles, isLoading, setAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );

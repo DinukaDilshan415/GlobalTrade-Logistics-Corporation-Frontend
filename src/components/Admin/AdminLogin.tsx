@@ -18,7 +18,7 @@ export const AdminLogin: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { setToken } = useAuth();
+    const { setAuth } = useAuth();
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -56,7 +56,7 @@ export const AdminLogin: React.FC = () => {
 
             if (response.ok) {
 
-                setToken(json.accessToken);
+                setAuth(json.accessToken, json.roles);
                 toast.success(json.message);
 
                 window.location.replace('/admin/dashboard');
