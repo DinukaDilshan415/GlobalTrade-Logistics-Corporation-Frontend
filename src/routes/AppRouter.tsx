@@ -7,14 +7,16 @@ import AdminDashboard from "../components/Admin/AdminDashboard";
 import Test from "../components/Test";
 import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import UnauthorizedPage from "../components/UnauthorizedPage";
+import VendorAccountRequest from "../components/user/VendorAccountRequest";
+import VendorProfile from "../components/user/VendorProfile";
 
 const router = createBrowserRouter([
   {
     path: "/login",
     element: (
-    //   <GuestRoute>
-        <Login/>
-    //   </GuestRoute>
+      //   <GuestRoute>
+      <Login />
+      //   </GuestRoute>
     ),
   },
   {
@@ -38,13 +40,29 @@ const router = createBrowserRouter([
     Component: AdminLogin
   },
   {
-  path: "/admin/dashboard",
-  element: (
-    <ProtectedRoute requiredRoles={["admin", "manager"]}>
+    path: "/admin/dashboard",
+    element: (
+      // <ProtectedRoute requiredRoles={["admin", "manager"]}>
       <AdminDashboard />
-    </ProtectedRoute>
-  ),
-},
+      // </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/open-vender-account",
+    element: (
+      <ProtectedRoute requiredRoles={["customer"]}>
+        <VendorAccountRequest />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute requiredRoles={["customer"]}>
+        <VendorProfile />
+      </ProtectedRoute>
+    ),
+  },
 
 ]);
 
