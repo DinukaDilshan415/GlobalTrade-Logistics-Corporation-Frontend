@@ -105,7 +105,7 @@ export const Header: React.FC = () => {
                       <span>Administration</span>
                     </a>
                     <a
-                      href="#profile"
+                      href="/profile"
                       className="flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:text-globlePrimary hover:bg-globlePrimary/5 rounded-xl transition-colors"
                     >
                       <UserCircle className="h-4 w-4 text-slate-400" />
@@ -123,7 +123,7 @@ export const Header: React.FC = () => {
                   {/* Highlight CTA in Dropdown */}
                   <div className="pt-2">
                     <a
-                      href="#open-account"
+                      href="/open-vender-account"
                       className="flex items-center justify-between px-3.5 py-2.5 text-xs font-bold text-globlePrimary hover:bg-globlePrimary/10 rounded-xl transition-colors"
                     >
                       <div className="flex items-center gap-2">

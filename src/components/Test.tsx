@@ -1,4 +1,5 @@
-﻿import { GLOBAL_BASE_URL } from "../api/client";
+﻿import { toast } from "react-toastify";
+import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from "../api/client";
 import { useAuth } from "./context/AuthContext";
 
 function Test() {
@@ -18,7 +19,7 @@ function Test() {
                 setAuth(null, []);
                 window.location.href = "/login";
             } else {
-                
+
             }
         } catch {
             // no valid session, stay logged out
@@ -35,7 +36,7 @@ function Test() {
 
         try {
             const headers: Record<string, string> = {
-                'Content-Type': 'application/json',
+                ...DEFAULT_HEADERS,
             };
 
             if (token) {
@@ -44,7 +45,7 @@ function Test() {
                 console.warn('No auth token available; request will be sent without Authorization header');
             }
 
-            const response = await fetch('http://localhost:8080/globaltrade-logistics-corporation/api/test', {
+            const response = await fetch(`${GLOBAL_BASE_URL}/test`, {
                 method: "POST",
                 credentials: "include",
                 headers,
@@ -55,12 +56,14 @@ function Test() {
                 const json = await response.json();
                 console.log(json);
             } else if (response.status === 401) {
-                tryRefresh
+                tryRefresh();
             } else {
-                console.warn('Test request failed', response.status, response.statusText);
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
             }
         } catch (error) {
-            console.error('Error during test submission:', error);
+            toast.error("Something Wrong : " + error);
+            console.error("Error:", error);
         }
     }
 
