@@ -9,6 +9,7 @@ import { ProtectedRoute } from "../components/auth/ProtectedRoute";
 import UnauthorizedPage from "../components/UnauthorizedPage";
 import VendorAccountRequest from "../components/user/VendorAccountRequest";
 import VendorProfile from "../components/user/VendorProfile";
+import MainApplication from "../components/Admin/MainApplication";
 
 const router = createBrowserRouter([
   {
@@ -42,9 +43,9 @@ const router = createBrowserRouter([
   {
     path: "/admin/dashboard",
     element: (
-      // <ProtectedRoute requiredRoles={["admin", "manager"]}>
-      <AdminDashboard />
-      // </ProtectedRoute>
+      <ProtectedRoute requiredRoles={["admin", "manager"]}>
+        <MainApplication />
+      </ProtectedRoute>
     ),
   },
   {
