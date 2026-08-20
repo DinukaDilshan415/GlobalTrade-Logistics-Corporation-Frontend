@@ -9,10 +9,37 @@ import {
 export const AdminDashboard: React.FC = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
+    // Menu item interface
+    interface MenuItem {
+        id: string;
+        label: string;
+        icon?: React.ComponentType<any>;
+        href?: string;
+    }
+    // Menu definitions (typed)
+    const mainMenu: MenuItem[] = [
+        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '#dashboard' },
+        { id: 'shipments', label: 'Shipments', icon: Truck, href: '#shipments' },
+        { id: 'inventory', label: 'Inventory', icon: Package, href: '#inventory' },
+        { id: 'vendors', label: 'Vendors', icon: Building2, href: '#vendors' },
+        { id: 'customs-compliance', label: 'Customs & Compliance', icon: ClipboardCheck, href: '#customs-compliance' },
+        { id: 'routes', label: 'Routes', icon: Map, href: '#routes' },
+        { id: 'alerts', label: 'Alerts', icon: Bell, href: '#alerts' },
+    ];
+    const adminMenu: MenuItem[] = [
+        { id: 'audit-logs', label: 'Audit Logs', icon: ScrollText, href: '#audit-logs' },
+        { id: 'users-roles', label: 'Users & Roles', icon: Users, href: '#users-roles' },
+    ];
+    const systemMenu: MenuItem[] = [
+        { id: 'system-monitoring', label: 'System Monitoring', icon: Activity, href: '#system-monitoring' },
+        { id: 'performance', label: 'Performance', icon: BarChart2, href: '#performance' },
+        { id: 'exceptions', label: 'Exceptions', icon: AlertTriangle, href: '#exceptions' },
+    ];
     // Reusable Sidebar Link Component
     const SidebarLink = ({ icon: Icon, label, active = false }: { icon: any, label: string, active?: boolean }) => (
         <a
             href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
+            onClick={(e) => { e.preventDefault(); window.location.assign(`#${label.toLowerCase().replace(/\s+/g, '-')}`); }}
             className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${active
                     ? 'bg-[#0096ed]/10 text-[#0096ed]'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -57,13 +84,9 @@ export const AdminDashboard: React.FC = () => {
 
                     {/* Main Operations */}
                     <div className="space-y-1">
-                        <SidebarLink icon={LayoutDashboard} label="Dashboard" active />
-                        <SidebarLink icon={Truck} label="Shipments" />
-                        <SidebarLink icon={Package} label="Inventory" />
-                        <SidebarLink icon={Building2} label="Vendors" />
-                        <SidebarLink icon={ClipboardCheck} label="Customs & Compliance" />
-                        <SidebarLink icon={Map} label="Routes" />
-                        <SidebarLink icon={Bell} label="Alerts" />
+                        {mainMenu.map((m) => (
+                            <SidebarLink key={m.id} icon={m.icon} label={m.label} active={window.location.hash === m.href || (window.location.hash === '' && m.id === 'dashboard')} />
+                        ))}
                     </div>
 
                     <div className="h-px bg-slate-800/60 my-2" />
@@ -71,8 +94,9 @@ export const AdminDashboard: React.FC = () => {
                     {/* Administration */}
                     <div className="space-y-1">
                         <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Administration</p>
-                        <SidebarLink icon={ScrollText} label="Audit Logs" />
-                        <SidebarLink icon={Users} label="Users & Roles" />
+                        {adminMenu.map((m) => (
+                            <SidebarLink key={m.id} icon={m.icon} label={m.label} active={window.location.hash === m.href} />
+                        ))}
                     </div>
 
                     <div className="h-px bg-slate-800/60 my-2" />
@@ -80,9 +104,9 @@ export const AdminDashboard: React.FC = () => {
                     {/* System */}
                     <div className="space-y-1">
                         <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">System</p>
-                        <SidebarLink icon={Activity} label="System Monitoring" />
-                        <SidebarLink icon={BarChart2} label="Performance" />
-                        <SidebarLink icon={AlertTriangle} label="Exceptions" />
+                        {systemMenu.map((m) => (
+                            <SidebarLink key={m.id} icon={m.icon} label={m.label} active={window.location.hash === m.href} />
+                        ))}
                     </div>
                 </div>
 
