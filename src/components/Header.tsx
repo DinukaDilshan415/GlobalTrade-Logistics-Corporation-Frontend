@@ -43,7 +43,7 @@ export const Header: React.FC = () => {
   }, []);
 
   const navItems = [
-    { label: 'Shipping', href: '#shipping' },
+    { label: 'Shipping', href: '/shipments' },
     { label: 'Tracking', href: '#tracking' },
     { label: 'Support', href: '#support' },
   ];

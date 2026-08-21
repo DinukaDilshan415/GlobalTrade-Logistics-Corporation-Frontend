@@ -10,6 +10,7 @@ import UnauthorizedPage from "../components/UnauthorizedPage";
 import VendorAccountRequest from "../components/user/VendorAccountRequest";
 import VendorProfile from "../components/user/VendorProfile";
 import MainApplication from "../components/Admin/MainApplication";
+import VendorShipments from "../components/user/VendorShipments";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute requiredRoles={["customer"]}>
         <VendorProfile />
+      </ProtectedRoute>
+    ),
+  },
+   {
+    path: "/shipments",
+    element: (
+      <ProtectedRoute requiredRoles={["customer"]}>
+        <VendorShipments />
       </ProtectedRoute>
     ),
   },
