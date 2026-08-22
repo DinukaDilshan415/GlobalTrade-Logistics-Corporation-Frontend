@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import {
-    Globe2, LayoutDashboard, Truck, Package, Building2,
+    LayoutDashboard, Truck, Package, Building2,
     ClipboardCheck, Map, Bell, ScrollText, Users,
     Activity, BarChart2, AlertTriangle, User, LogOut,
-    Search, Menu, X, ChevronRight, Clock, AlertCircle,
-    Filter, Download, RefreshCw, CheckCircle2, Plus,
-    ShieldCheck, ArrowRight, Settings
+    Search, Menu, X, Clock, AlertCircle,
+    CheckCircle2, Plus, Settings
 } from 'lucide-react';
 import VendorsManagement from './DashBoardComponents/VendorsManagement';
+import AdminShipments from './DashBoardComponents/AdminShipments';
 
 // Define available routes matching the sidebar
 type Route =
@@ -32,7 +32,7 @@ export const MainApplication: React.FC = () => {
                 <p className="text-sm text-slate-500 mt-1">{description}</p>
             </div>
             {actionLabel && (
-                <button onClick={onAction} className="flex items-center gap-2 px-4 py-2.5 bg-[#0096ed] hover:bg-[#0082ce] text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-[#0096ed]/20">
+                <button onClick={onAction} className="flex items-center gap-2 px-4 py-2.5 bg-globlePrimary hover:bg-[#0082ce] text-white rounded-xl text-sm font-bold transition-all shadow-md shadow-globlePrimary/20">
                     <Plus className="w-4 h-4" /> {actionLabel}
                 </button>
             )}
@@ -50,7 +50,7 @@ export const MainApplication: React.FC = () => {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {[
-                    { label: 'Total Shipments', val: '1,248', icon: Truck, color: 'text-[#0096ed]', bg: 'bg-[#0096ed]/10', border: 'hover:border-[#0096ed]/30' },
+                    { label: 'Total Shipments', val: '1,248', icon: Truck, color: 'text-globlePrimary', bg: 'bg-globlePrimary/10', border: 'hover:border-globlePrimary/30' },
                     { label: 'Delayed', val: '42', icon: Clock, color: 'text-red-500', bg: 'bg-red-50', border: 'hover:border-red-500/30' },
                     { label: 'Active Alerts', val: '18', icon: AlertCircle, color: 'text-amber-500', bg: 'bg-amber-50', border: 'hover:border-amber-500/30' },
                     { label: 'Customs Pending', val: '156', icon: ClipboardCheck, color: 'text-lime-700', bg: 'bg-[#b2d235]/20', border: 'hover:border-[#b2d235]/50' },
@@ -75,7 +75,7 @@ export const MainApplication: React.FC = () => {
                 <div className="max-w-3xl space-y-8">
                     {[
                         { label: 'Delivered', count: '894', pct: '71%', color: 'bg-[#b2d235]' },
-                        { label: 'In Transit', count: '312', pct: '25%', color: 'bg-[#0096ed]', animate: true },
+                        { label: 'In Transit', count: '312', pct: '25%', color: 'bg-globlePrimary', animate: true },
                         { label: 'Delayed', count: '42', pct: '4%', color: 'bg-red-500' },
                     ].map((stat, idx) => (
                         <div key={idx}>
@@ -97,37 +97,7 @@ export const MainApplication: React.FC = () => {
 
     const ShipmentsView = () => (
         <div className="animate-in fade-in duration-300">
-            <PageHeader title="Shipments" description="Manage active consignments, view tracking, and update logistics statuses." actionLabel="New Shipment" />
-            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="p-4 border-b border-slate-200 flex justify-end gap-2 bg-slate-50">
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold transition-colors"><Filter className="w-4 h-4" /> Filter</button>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg text-sm font-bold transition-colors"><Download className="w-4 h-4" /> Export</button>
-                </div>
-                <table className="w-full text-left border-collapse">
-                    <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200 text-xs uppercase tracking-wider text-slate-500 font-bold">
-                            <th className="p-4 pl-6">Tracking ID</th>
-                            <th className="p-4">Route</th>
-                            <th className="p-4">Type</th>
-                            <th className="p-4">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-sm">
-                        {[
-                            { id: 'SHP-9021', origin: 'Shanghai, CN', dest: 'Colombo, LK', status: 'In Transit', type: 'Air Freight' },
-                            { id: 'SHP-9022', origin: 'Dubai, UAE', dest: 'London, UK', status: 'Delivered', type: 'Ocean Freight' },
-                            { id: 'SHP-9023', origin: 'New York, US', dest: 'Tokyo, JP', status: 'Customs Hold', type: 'Air Freight' },
-                        ].map((s, i) => (
-                            <tr key={i} className="hover:bg-slate-50 cursor-pointer group">
-                                <td className="p-4 pl-6 font-bold text-slate-900 group-hover:text-[#0096ed]">{s.id}</td>
-                                <td className="p-4"><div className="font-semibold">{s.origin}</div><div className="text-xs text-slate-500 flex items-center gap-1 mt-0.5"><ChevronRight className="w-3 h-3" /> {s.dest}</div></td>
-                                <td className="p-4 text-slate-600 font-medium">{s.type}</td>
-                                <td className="p-4"><span className={`px-3 py-1 rounded-full text-xs font-bold border ${s.status === 'Delivered' ? 'bg-[#b2d235]/10 text-lime-700 border-[#b2d235]/20' : s.status === 'Customs Hold' ? 'bg-amber-50 text-amber-600 border-amber-200' : 'bg-[#0096ed]/10 text-[#0096ed] border-[#0096ed]/20'}`}>{s.status}</span></td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <AdminShipments/>
         </div>
     );
 
@@ -146,7 +116,7 @@ export const MainApplication: React.FC = () => {
                             <h3 className="font-bold text-slate-900">{wh.name}</h3>
                         </div>
                         <div className="mb-2 flex justify-between text-sm"><span className="text-slate-500 font-medium">Capacity</span><span className="font-bold">{wh.capacity}</span></div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 mb-4"><div className={`h-2 rounded-full ${parseInt(wh.capacity) > 90 ? 'bg-red-500' : 'bg-[#b2d235]'}`} style={{ width: wh.capacity }}></div></div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 mb-4"><div className={`h-2 rounded-full ${parseInt(wh.capacity) > 90 ? 'bg-red-500' : 'bg-globleSecondary'}`} style={{ width: wh.capacity }}></div></div>
                         <div className="text-sm font-medium text-slate-600 border-t border-slate-100 pt-4 mt-2">Active Items: <span className="font-bold text-slate-900">{wh.items}</span></div>
                     </div>
                 ))}
@@ -183,7 +153,7 @@ export const MainApplication: React.FC = () => {
                                     {exc.status === 'Resolved' ? (
                                         <span className="flex items-center justify-end gap-1 text-xs font-bold text-lime-600"><CheckCircle2 className="w-4 h-4" /> Resolved</span>
                                     ) : (
-                                        <button className="text-xs font-bold text-[#0096ed] hover:text-white hover:bg-[#0096ed] px-3 py-1.5 rounded-lg border border-[#0096ed] transition-colors">Recover</button>
+                                        <button className="text-xs font-bold text-globlePrimary hover:text-white hover:bg-globlePrimary px-3 py-1.5 rounded-lg border border-globlePrimary transition-colors">Recover</button>
                                     )}
                                 </td>
                             </tr>
@@ -233,8 +203,8 @@ export const MainApplication: React.FC = () => {
     const SidebarItem = ({ icon: Icon, label, route }: { icon: any, label: string, route: Route }) => {
         const isActive = activeRoute === route;
         return (
-            <button onClick={() => navigateTo(route)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${isActive ? 'bg-[#0096ed]/10 text-[#0096ed]' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
-                <Icon className={`w-5 h-5 ${isActive ? 'text-[#0096ed]' : 'text-slate-400'}`} />
+            <button onClick={() => navigateTo(route)} className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all font-medium text-sm ${isActive ? 'bg-globlePrimary/10 text-globlePrimary' : 'text-slate-400 hover:text-white hover:bg-slate-800'}`}>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-globlePrimary' : 'text-slate-400'}`} />
                 {label}
             </button>
         );
@@ -312,27 +282,27 @@ export const MainApplication: React.FC = () => {
                         <button className="lg:hidden p-2 text-slate-600 hover:bg-slate-100 rounded-lg" onClick={() => setSidebarOpen(true)}>
                             <Menu className="w-5 h-5" />
                         </button>
-                        <div className="hidden sm:flex items-center bg-slate-100 px-4 py-2 rounded-full border border-slate-200 focus-within:ring-2 focus-within:ring-[#0096ed]/20 focus-within:border-[#0096ed] transition-all">
+                        <div className="hidden sm:flex items-center bg-slate-100 px-4 py-2 rounded-full border border-slate-200 focus-within:ring-2 focus-within:ring-globlePrimary/20 focus-within:border-globlePrimary transition-all">
                             <Search className="w-4 h-4 text-slate-400 mr-2" />
                             <input type="text" placeholder="Search Tracking IDs, Vendors..." className="bg-transparent border-none outline-none text-sm w-64 text-slate-700 placeholder-slate-400" />
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4 sm:gap-6">
-                        <button className="relative p-2 text-slate-400 hover:text-[#0096ed] transition-colors">
+                        <button className="relative p-2 text-slate-400 hover:text-globlePrimary transition-colors">
                             <Bell className="w-5 h-5" />
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-[#0096ed] transition-colors hidden sm:block">
+                        <button className="p-2 text-slate-400 hover:text-globlePrimary transition-colors hidden sm:block">
                             <Settings className="w-5 h-5" />
                         </button>
                         <div className="h-8 w-px bg-slate-200" />
                         <div className="flex items-center gap-3 cursor-pointer group" onClick={() => navigateTo('profile')}>
-                            <div className="w-9 h-9 rounded-full bg-[#0096ed]/10 border border-[#0096ed]/20 flex items-center justify-center text-[#0096ed] font-bold">
+                            <div className="w-9 h-9 rounded-full bg-globlePrimary/10 border border-globlePrimary/20 flex items-center justify-center text-globlePrimary font-bold">
                                 DD
                             </div>
                             <div className="hidden md:block text-sm">
-                                <p className="font-bold text-slate-700 group-hover:text-[#0096ed] transition-colors">ADMIN USER</p>
+                                <p className="font-bold text-slate-700 group-hover:text-globlePrimary transition-colors">ADMIN USER</p>
                                 <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">System Admin</p>
                             </div>
                         </div>

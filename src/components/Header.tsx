@@ -98,7 +98,7 @@ export const Header: React.FC = () => {
                 <div className="absolute left-0 top-full mt-2 w-64 rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-900/5 divide-y divide-slate-100 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                   <div className="py-1">
                     <a
-                      href="#admin"
+                      href="/admin/dashboard"
                       className="flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:text-globlePrimary hover:bg-globlePrimary/5 rounded-xl transition-colors"
                     >
                       <Settings className="h-4 w-4 text-slate-400" />
