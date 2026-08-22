@@ -17,7 +17,7 @@ export const HomePage: React.FC = () => {
   const handleTrackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!trackingNumber.trim()) return;
-    alert(`Tracking order number: ${trackingNumber}`);
+    window.location.href = `/tracking?id=${trackingNumber}`;
   };
 
   return (

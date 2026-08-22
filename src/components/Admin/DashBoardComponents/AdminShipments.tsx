@@ -439,35 +439,6 @@ export const AdminShipments: React.FC = () => {
         }
     }
 
-    // const submitTrackingUpdate = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     if (!selectedShipment) return;
-
-    //     const payload = {
-    //         shipment_id: selectedShipment.shipment_id,
-    //         ...statusUpdateForm
-    //     };
-
-    //     try {
-    //         if (API_CONFIG.USE_REAL_API) {
-    //             await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_STATUS}`, {
-    //                 method: 'PATCH',
-    //                 headers: DEFAULT_HEADERS,
-    //                 body: JSON.stringify(payload)
-    //             });
-    //         } else {
-    //             console.log("Status Update Payload:", payload);
-    //         }
-
-    //         setActiveShipments(prev => prev.map(s => s.shipment_id === payload.shipment_id ? { ...s, status: payload.status } : s));
-    //         setUpdateModalOpen(false);
-    //         setStatusUpdateForm({ status: 'IN_TRANSIT', location: '', description: '' });
-    //         alert("Shipment tracking updated successfully!");
-    //     } catch (err) {
-    //         console.error(err);
-    //     }
-    // };
-
     // --- Helper: Status Styles ---
     const getStatusBadge = (status: ShipStatus) => {
         switch (status) {
