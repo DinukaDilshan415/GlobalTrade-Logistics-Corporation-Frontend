@@ -1,0 +1,411 @@
+-- --------------------------------------------------------
+-- Host:                         127.0.0.1
+-- Server version:               8.0.32 - MySQL Community Server - GPL
+-- Server OS:                    Win64
+-- HeidiSQL Version:             12.5.0.6677
+-- --------------------------------------------------------
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+
+-- Dumping database structure for globaltrade_db
+CREATE DATABASE IF NOT EXISTS `globaltrade_db` /*!40100 DEFAULT CHARACTER SET utf8mb3 */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `globaltrade_db`;
+
+-- Dumping structure for table globaltrade_db.account_type
+CREATE TABLE IF NOT EXISTS `account_type` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `type` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.account_type: ~2 rows (approximately)
+REPLACE INTO `account_type` (`id`, `type`) VALUES
+	(1, 'customer'),
+	(2, 'customs_agent');
+
+-- Dumping structure for table globaltrade_db.admin
+CREATE TABLE IF NOT EXISTS `admin` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `password_hash` text NOT NULL,
+  `created_at` datetime NOT NULL,
+  `roles_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username_UNIQUE` (`username`),
+  KEY `fk_admin_roles1_idx` (`roles_id`),
+  CONSTRAINT `fk_admin_roles1` FOREIGN KEY (`roles_id`) REFERENCES `roles` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.admin: ~0 rows (approximately)
+REPLACE INTO `admin` (`id`, `username`, `password_hash`, `created_at`, `roles_id`) VALUES
+	(1, 'admin123', '$2a$12$jCtFhA.reaBT0AZ/OL4x0Ovm.Y.iv1vwZHflbkW4Pv/KuYrsaxcdK', '2026-08-18 03:14:36', 1);
+
+-- Dumping structure for table globaltrade_db.country
+CREATE TABLE IF NOT EXISTS `country` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.country: ~50 rows (approximately)
+REPLACE INTO `country` (`id`, `name`) VALUES
+	(1, 'Afghanistan'),
+	(2, 'Argentina'),
+	(3, 'Australia'),
+	(4, 'Bangladesh'),
+	(5, 'Brazil'),
+	(6, 'Canada'),
+	(7, 'China'),
+	(8, 'Colombia'),
+	(9, 'DR Congo'),
+	(10, 'Egypt'),
+	(11, 'Ethiopia'),
+	(12, 'France'),
+	(13, 'Germany'),
+	(14, 'India'),
+	(15, 'Indonesia'),
+	(16, 'Iran'),
+	(17, 'Iraq'),
+	(18, 'Italy'),
+	(19, 'Japan'),
+	(20, 'Kenya'),
+	(21, 'Malaysia'),
+	(22, 'Mexico'),
+	(23, 'Maldives'),
+	(24, 'Myanmar'),
+	(25, 'Nepal'),
+	(26, 'Netherlands'),
+	(27, 'Nigeria'),
+	(28, 'Pakistan'),
+	(29, 'Peru'),
+	(30, 'Philippines'),
+	(31, 'Poland'),
+	(32, 'Russia'),
+	(33, 'Saudi Arabia'),
+	(34, 'South Africa'),
+	(35, 'South Korea'),
+	(36, 'Spain'),
+	(37, 'Sudan'),
+	(38, 'Sri Lanka'),
+	(39, 'Thailand'),
+	(40, 'Turkey'),
+	(41, 'Uganda'),
+	(42, 'Ukraine'),
+	(43, 'United Kingdom'),
+	(44, 'United States'),
+	(45, 'Uzbekistan'),
+	(46, 'Venezuela'),
+	(47, 'Vietnam'),
+	(48, 'Yemen'),
+	(49, 'Zambia'),
+	(50, 'Zimbabwe');
+
+-- Dumping structure for table globaltrade_db.inventory
+CREATE TABLE IF NOT EXISTS `inventory` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `product_name` varchar(45) NOT NULL,
+  `hs_code` varchar(45) NOT NULL,
+  `quantity` int NOT NULL,
+  `unit_value` int NOT NULL,
+  `warehouses_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_inventory_warehouses1_idx` (`warehouses_id`),
+  CONSTRAINT `fk_inventory_warehouses1` FOREIGN KEY (`warehouses_id`) REFERENCES `warehouses` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.inventory: ~0 rows (approximately)
+REPLACE INTO `inventory` (`id`, `product_name`, `hs_code`, `quantity`, `unit_value`, `warehouses_id`) VALUES
+	(1, 'fddd', '455n4', 56, 45, 3),
+	(2, 'hhhh', '34cawx', 79, 55, 3);
+
+-- Dumping structure for table globaltrade_db.refresh_token
+CREATE TABLE IF NOT EXISTS `refresh_token` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `createdAt` datetime(6) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `expiryAt` datetime(6) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK6t7skxndr9jtm3ckw71g75tfl` (`email`),
+  UNIQUE KEY `UK_r4k4edos30bx9neoq81mdvwph` (`token`),
+  UNIQUE KEY `UKr4k4edos30bx9neoq81mdvwph` (`token`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.refresh_token: ~0 rows (approximately)
+REPLACE INTO `refresh_token` (`id`, `createdAt`, `email`, `expiryAt`, `token`) VALUES
+	(13, '2026-08-22 05:07:53.993392', 'admin123', '2026-08-29 05:07:53.993392', 'f3fb5a0d580443e080513c7616ed546876b2591a6cd54c19b96b391c97ae4f8a');
+
+-- Dumping structure for table globaltrade_db.roles
+CREATE TABLE IF NOT EXISTS `roles` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `role` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.roles: ~2 rows (approximately)
+REPLACE INTO `roles` (`id`, `role`) VALUES
+	(1, 'admin'),
+	(2, 'manager');
+
+-- Dumping structure for table globaltrade_db.shipment
+CREATE TABLE IF NOT EXISTS `shipment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shipment_id` varchar(45) NOT NULL,
+  `carrier` varchar(45) NOT NULL,
+  `expect_data` datetime NOT NULL,
+  `weight` double NOT NULL,
+  `description` text NOT NULL,
+  `origin_address` varchar(100) NOT NULL,
+  `sender_name` varchar(45) NOT NULL,
+  `sender_phone` varchar(45) NOT NULL,
+  `dest_address` varchar(100) NOT NULL,
+  `recipient_name` varchar(45) NOT NULL,
+  `recipient_phone` varchar(45) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  `origin_country_id` int NOT NULL,
+  `dest_country_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_shipment_country1_idx` (`origin_country_id`),
+  KEY `fk_shipment_country2_idx` (`dest_country_id`),
+  CONSTRAINT `fk_shipment_country1` FOREIGN KEY (`origin_country_id`) REFERENCES `country` (`id`),
+  CONSTRAINT `fk_shipment_country2` FOREIGN KEY (`dest_country_id`) REFERENCES `country` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.shipment: ~0 rows (approximately)
+REPLACE INTO `shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `recipient_name`, `recipient_phone`, `created_at`, `updated_at`, `origin_country_id`, `dest_country_id`) VALUES
+	(1, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', 'Samantha', '0762078415', '2026-08-22 06:51:37', '2026-08-22 06:51:37', 38, 34);
+
+-- Dumping structure for table globaltrade_db.shipment_items
+CREATE TABLE IF NOT EXISTS `shipment_items` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ship_product_id` int DEFAULT NULL,
+  `inventory_id` int DEFAULT NULL,
+  `shipment_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_shipment_items_ship_product1_idx` (`ship_product_id`),
+  KEY `fk_shipment_items_shipment1_idx` (`shipment_id`),
+  KEY `fk_shipment_items_inventory1_idx` (`inventory_id`),
+  CONSTRAINT `fk_shipment_items_inventory1` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`),
+  CONSTRAINT `fk_shipment_items_ship_product1` FOREIGN KEY (`ship_product_id`) REFERENCES `ship_product` (`id`),
+  CONSTRAINT `fk_shipment_items_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.shipment_items: ~0 rows (approximately)
+REPLACE INTO `shipment_items` (`id`, `ship_product_id`, `inventory_id`, `shipment_id`) VALUES
+	(1, 5, NULL, 1),
+	(2, 6, NULL, 1);
+
+-- Dumping structure for table globaltrade_db.shipment_progress
+CREATE TABLE IF NOT EXISTS `shipment_progress` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `ship_status_id` int NOT NULL,
+  `location` varchar(45) NOT NULL,
+  `description` text NOT NULL,
+  `shipment_id` int NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_shipment_progress_ship_status1_idx` (`ship_status_id`),
+  KEY `fk_shipment_progress_shipment1_idx` (`shipment_id`),
+  CONSTRAINT `fk_shipment_progress_ship_status1` FOREIGN KEY (`ship_status_id`) REFERENCES `ship_status` (`id`),
+  CONSTRAINT `fk_shipment_progress_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.shipment_progress: ~0 rows (approximately)
+REPLACE INTO `shipment_progress` (`id`, `ship_status_id`, `location`, `description`, `shipment_id`, `created_at`) VALUES
+	(1, 1, 'From : Sri Lanka To : South Africa', 'Shipment Accepted By Global Trade Logistics Corporation', 1, '2026-08-22 06:51:37'),
+	(2, 4, 'GlobalTrade Katunayake Express', 'We are preparing your item for shipment', 1, '2026-08-22 10:10:24'),
+	(3, 5, 'katunayake airport', 'Your package is on its way', 1, '2026-08-22 10:38:21');
+
+-- Dumping structure for table globaltrade_db.ship_category
+CREATE TABLE IF NOT EXISTS `ship_category` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.ship_category: ~2 rows (approximately)
+REPLACE INTO `ship_category` (`id`, `name`) VALUES
+	(1, 'DIRECT'),
+	(2, 'INVENTORY');
+
+-- Dumping structure for table globaltrade_db.ship_product
+CREATE TABLE IF NOT EXISTS `ship_product` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `hs_code` varchar(45) NOT NULL,
+  `quantity` int NOT NULL,
+  `unit_value` int NOT NULL,
+  `vendor_shipment_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_ship_product_vendor_shipment1_idx` (`vendor_shipment_id`),
+  CONSTRAINT `fk_ship_product_vendor_shipment1` FOREIGN KEY (`vendor_shipment_id`) REFERENCES `vendor_shipment` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.ship_product: ~4 rows (approximately)
+REPLACE INTO `ship_product` (`id`, `name`, `hs_code`, `quantity`, `unit_value`, `vendor_shipment_id`) VALUES
+	(1, 'fddd', '455n4', 56, 45, 2),
+	(2, 'hhhh', '34cawx', 79, 55, 2),
+	(5, 'Laptop Cooling Pad', 'L-3443', 1, 10, 4),
+	(6, 'ASUS ExpertBook B1', 'L-1212', 1, 1000, 4);
+
+-- Dumping structure for table globaltrade_db.ship_status
+CREATE TABLE IF NOT EXISTS `ship_status` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.ship_status: ~8 rows (approximately)
+REPLACE INTO `ship_status` (`id`, `name`) VALUES
+	(1, 'ACCEPTED'),
+	(2, 'NOT_ACCEPTED'),
+	(3, 'PENDING'),
+	(4, 'PROCESSING'),
+	(5, 'IN_TRANSIT'),
+	(6, 'DELAYED'),
+	(7, 'DELIVERED'),
+	(8, 'CANCELLED');
+
+-- Dumping structure for table globaltrade_db.user
+CREATE TABLE IF NOT EXISTS `user` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(45) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `password_hash` text NOT NULL,
+  `account_type_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_user_account_type_idx` (`account_type_id`),
+  CONSTRAINT `fk_user_account_type` FOREIGN KEY (`account_type_id`) REFERENCES `account_type` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.user: ~0 rows (approximately)
+REPLACE INTO `user` (`id`, `username`, `email`, `password_hash`, `account_type_id`) VALUES
+	(1, 'Doris K. Thomas', 'doris@gmail.com', '$2a$12$10.VsrznjxWhyDz/N9ff8.Vf56E9UMbDeORFVOo6./sfGAVbGOCRS', 1);
+
+-- Dumping structure for table globaltrade_db.vendor
+CREATE TABLE IF NOT EXISTS `vendor` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `vendor_id` varchar(45) NOT NULL,
+  `company_name` varchar(45) NOT NULL,
+  `contact_person` varchar(45) NOT NULL,
+  `email` varchar(45) NOT NULL,
+  `phone` varchar(45) NOT NULL,
+  `address` text NOT NULL,
+  `reg_number` varchar(45) NOT NULL,
+  `compliance_information` text NOT NULL,
+  `req_date` datetime NOT NULL,
+  `created_at` datetime NOT NULL,
+  `country_id` int NOT NULL,
+  `vendor_status_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_vendor_vendor_status1_idx` (`vendor_status_id`),
+  KEY `fk_vendor_country1_idx` (`country_id`),
+  KEY `fk_vendor_user1_idx` (`user_id`),
+  CONSTRAINT `fk_vendor_country1` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`),
+  CONSTRAINT `fk_vendor_user1` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
+  CONSTRAINT `fk_vendor_vendor_status1` FOREIGN KEY (`vendor_status_id`) REFERENCES `vendor_status` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.vendor: ~1 rows (approximately)
+REPLACE INTO `vendor` (`id`, `vendor_id`, `company_name`, `contact_person`, `email`, `phone`, `address`, `reg_number`, `compliance_information`, `req_date`, `created_at`, `country_id`, `vendor_status_id`, `user_id`) VALUES
+	(1, 'VND-1768', 'Sky Camping', 'Dinuka Dilshan', 'dinukadilshan8026@gmail.com', '0762078415', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'REG-3287374', 'government approved', '2026-08-19 07:59:15', '2026-08-19 07:59:15', 38, 2, 1);
+
+-- Dumping structure for table globaltrade_db.vendor_shipment
+CREATE TABLE IF NOT EXISTS `vendor_shipment` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shipment_id` varchar(45) NOT NULL,
+  `carrier` varchar(45) NOT NULL,
+  `expect_data` datetime NOT NULL,
+  `weight` double NOT NULL,
+  `description` text NOT NULL,
+  `origin_address` varchar(100) NOT NULL,
+  `sender_name` varchar(45) NOT NULL,
+  `sender_phone` varchar(45) NOT NULL,
+  `dest_address` varchar(100) DEFAULT NULL,
+  `warehouses_id` int DEFAULT NULL,
+  `recipient_name` varchar(45) DEFAULT NULL,
+  `recipient_phone` varchar(45) DEFAULT NULL,
+  `ship_category_id` int NOT NULL,
+  `vendor_id` int NOT NULL,
+  `origin_country_id` int NOT NULL,
+  `dest_country_id` int NOT NULL,
+  `created_at` datetime NOT NULL,
+  `ship_status_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_vendor_shipment_ship_category1_idx` (`ship_category_id`),
+  KEY `fk_vendor_shipment_vendor1_idx` (`vendor_id`),
+  KEY `fk_vendor_shipment_warehouses1_idx` (`warehouses_id`),
+  KEY `fk_vendor_shipment_country1_idx` (`origin_country_id`),
+  KEY `fk_vendor_shipment_country2_idx` (`dest_country_id`),
+  KEY `fk_vendor_shipment_ship_status1_idx` (`ship_status_id`),
+  CONSTRAINT `fk_vendor_shipment_country1` FOREIGN KEY (`origin_country_id`) REFERENCES `country` (`id`),
+  CONSTRAINT `fk_vendor_shipment_country2` FOREIGN KEY (`dest_country_id`) REFERENCES `country` (`id`),
+  CONSTRAINT `fk_vendor_shipment_ship_category1` FOREIGN KEY (`ship_category_id`) REFERENCES `ship_category` (`id`),
+  CONSTRAINT `fk_vendor_shipment_ship_status1` FOREIGN KEY (`ship_status_id`) REFERENCES `ship_status` (`id`),
+  CONSTRAINT `fk_vendor_shipment_vendor1` FOREIGN KEY (`vendor_id`) REFERENCES `vendor` (`id`),
+  CONSTRAINT `fk_vendor_shipment_warehouses1` FOREIGN KEY (`warehouses_id`) REFERENCES `warehouses` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.vendor_shipment: ~2 rows (approximately)
+REPLACE INTO `vendor_shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `warehouses_id`, `recipient_name`, `recipient_phone`, `ship_category_id`, `vendor_id`, `origin_country_id`, `dest_country_id`, `created_at`, `ship_status_id`) VALUES
+	(2, 'SHP-230634', 'FedEx', '2026-08-29 00:00:00', 70, 'noo', '3434', 'dfdf', '455435435435', '', 3, '', '', 2, 1, 34, 38, '2026-08-21 07:38:34', 1),
+	(4, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', NULL, 'Samantha', '565645635', 1, 1, 38, 34, '2026-08-21 08:10:40', 1);
+
+-- Dumping structure for table globaltrade_db.vendor_status
+CREATE TABLE IF NOT EXISTS `vendor_status` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `status` varchar(45) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.vendor_status: ~4 rows (approximately)
+REPLACE INTO `vendor_status` (`id`, `status`) VALUES
+	(1, 'review'),
+	(2, 'active'),
+	(3, 'warning'),
+	(4, 'suspended');
+
+-- Dumping structure for table globaltrade_db.warehouses
+CREATE TABLE IF NOT EXISTS `warehouses` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `country_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_wearehouses_country1_idx` (`country_id`),
+  CONSTRAINT `fk_wearehouses_country1` FOREIGN KEY (`country_id`) REFERENCES `country` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.warehouses: ~16 rows (approximately)
+REPLACE INTO `warehouses` (`id`, `name`, `country_id`) VALUES
+	(1, 'GlobalTrade Colombo Central Hub', 38),
+	(2, 'GlobalTrade Kelani Valley Facility', 38),
+	(3, 'GlobalTrade Katunayake Express', 38),
+	(4, 'GlobalTrade Hambantota Gateway', 38),
+	(5, 'GlobalTrade Nhava Sheva Logistics Park', 14),
+	(6, 'GlobalTrade NCR Mega-Center', 14),
+	(7, 'GlobalTrade Bengaluru Tech-Fulfillment', 14),
+	(8, 'GlobalTrade Chennai Coast Depot', 14),
+	(9, 'GlobalTrade Shanghai Pudong Hub', 7),
+	(10, 'GlobalTrade Shenzhen Greater Bay Center', 7),
+	(11, 'GlobalTrade Ningbo Port Terminal', 7),
+	(12, 'GlobalTrade Chengdu Western Gateway', 7),
+	(13, 'GlobalTrade Tokyo Bay Logistics Center', 19),
+	(14, 'GlobalTrade Osaka Kansai Depot', 19),
+	(15, 'GlobalTrade Yokohama Harbor Facility', 19),
+	(16, 'GlobalTrade Narita Air Cargo Center', 19);
+
+/*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
+/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
+/*!40014 SET FOREIGN_KEY_CHECKS=IFNULL(@OLD_FOREIGN_KEY_CHECKS, 1) */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40111 SET SQL_NOTES=IFNULL(@OLD_SQL_NOTES, 1) */;

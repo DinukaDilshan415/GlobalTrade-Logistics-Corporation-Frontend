@@ -34,7 +34,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/tracking",
-    Component: TrackingDetails
+    element: (
+      <ProtectedRoute requiredRoles={[]}>
+        <TrackingDetails />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/admin/login",
