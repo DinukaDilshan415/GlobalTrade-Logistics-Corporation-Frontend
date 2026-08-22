@@ -27,6 +27,9 @@ export const ProtectedRoute = ({ children, requiredRoles }: ProtectedRouteProps)
     }
 
     if (!token) {
+        if(!requiredRoles?.indexOf("admin")){
+           return <Navigate to="/admin/login" replace />
+        } 
         return <Navigate to="/" replace />;
     }
 
