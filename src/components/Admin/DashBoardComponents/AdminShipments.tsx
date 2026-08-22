@@ -120,11 +120,35 @@ export const AdminShipments: React.FC = () => {
     const fetchReferenceData = async () => {
         try {
             if (API_CONFIG.USE_REAL_API) {
-                const resRef = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_REFERENCE_DATA}`, { headers: DEFAULT_HEADERS });
-                if (resRef.ok) {
-                    const json = await resRef.json();
+                const res = await fetch(`${GLOBAL_BASE_URL}/get/countriesWithWarehouses`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: DEFAULT_HEADERS,
+                });
+
+                if (res.ok) {
+                    const json = await res.json();
+                    console.log(json);
+
                     setCountries(Array.isArray(json.countries) ? json.countries : []);
-                    setWarehouses(Array.isArray(json.warehouses) ? json.warehouses : []);
+
+                    const warehouseList = Array.isArray(json.warehouses)
+                        ? (json.warehouses as Record<string, unknown>[])
+                        : [];
+
+                    const whList = warehouseList.map((w) => {
+                        const country = typeof w.country === 'object' && w.country !== null ? w.country as Record<string, unknown> : {};
+
+                        return {
+                            id: typeof w.id === 'string' || typeof w.id === 'number' ? String(w.id) : '',
+                            name: typeof w.name === 'string' ? w.name : '',
+                            countryId: typeof country.id === 'string' || typeof country.id === 'number' ? String(country.id) : ''
+                        };
+                    });
+
+                    setWarehouses(whList.filter((w) => w.id && w.name && w.countryId));
+                } else {
+                    console.warn('Failed to fetch reference data', res.status, res.statusText);
                 }
             } else {
                 setCountries([{ id: 'c1', name: 'Sri Lanka' }, { id: 'c2', name: 'China' }, { id: 'c3', name: 'Germany' }]);
@@ -134,8 +158,8 @@ export const AdminShipments: React.FC = () => {
                     { id: 'w3', countryId: 'c3', name: 'Frankfurt Distribution' }
                 ]);
             }
-        } catch (err) {
-            console.error('Error fetching reference data:', err);
+        } catch (e) {
+            console.warn('Error fetching reference data', e);
         }
     };
 
@@ -243,8 +267,52 @@ export const AdminShipments: React.FC = () => {
 
         try {
             if (API_CONFIG.USE_REAL_API) {
-                const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_WAREHOUSE_PRODUCTS}${warehouseId}`, { headers: DEFAULT_HEADERS });
-                if (res.ok) setAvailableProducts(await res.json());
+                const res = await fetch(`${GLOBAL_BASE_URL}/get/warehouseProducts/${warehouseId}`, {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: DEFAULT_HEADERS,
+                });
+
+                if (res.ok) {
+                    const json = await res.json();
+                    const productList = Array.isArray(json)
+                        ? json as Record<string, unknown>[]
+                        : Array.isArray(json?.data)
+                            ? json.data as Record<string, unknown>[]
+                            : Array.isArray(json?.products)
+                                ? json.products as Record<string, unknown>[]
+                                : [];
+
+                    const parsedProducts = productList
+                        .filter((product) => {
+                            const warehouseValue = product.warehouseId ?? product.warehouse_id ?? (
+                                typeof product.warehouse === 'object' && product.warehouse !== null
+                                    ? (product.warehouse as Record<string, unknown>).id
+                                    : undefined
+                            );
+                            return warehouseValue == null || String(warehouseValue) === String(warehouseId);
+                        })
+                        .map((product) => {
+                            const id = product.id ?? product.productId ?? product.product_id ?? '';
+                            const name = product.name ?? product.productName ?? 'Unknown product';
+                            const hsCode = product.hsCode ?? product.hs_code ?? product.hsCodeNumber ?? '';
+                            const unitValue = product.unitValue ?? product.unit_value ?? product.price ?? '0.00';
+                            const availableQty = product.availableQty ?? product.available_qty ?? product.stockQty ?? 0;
+
+                            return {
+                                id: String(id),
+                                name: String(name),
+                                hsCode: String(hsCode),
+                                unitValue: String(unitValue),
+                                availableQty: Number(availableQty),
+                            };
+                        });
+
+                    setAvailableProducts(parsedProducts);
+                } else {
+                    console.warn('Failed to fetch warehouse products', res.status, res.statusText);
+                    setAvailableProducts([]);
+                }
             } else {
                 await new Promise(res => setTimeout(res, 800));
                 const mockInventory: InventoryProduct[] = [
@@ -253,10 +321,15 @@ export const AdminShipments: React.FC = () => {
                     { id: 'p3', name: 'Fiber Optic Cables (Spool)', hsCode: '8544.70', unitValue: '120.00', availableQty: 45 },
                     { id: 'p4', name: 'Hydraulic Pumps', hsCode: '8413.50', unitValue: '850.00', availableQty: 12 },
                 ];
-                setAvailableProducts(warehouseId === 'w1' ? mockInventory.slice(0, 3) : mockInventory.slice(1, 4));
+                const filteredMockInventory = warehouseId === 'w1'
+                    ? mockInventory.filter(product => ['p1', 'p2', 'p3'].includes(product.id))
+                    : mockInventory.filter(product => ['p2', 'p3', 'p4'].includes(product.id));
+
+                setAvailableProducts(filteredMockInventory);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (e) {
+            console.warn('Error fetching warehouse products', e);
+            setAvailableProducts([]);
         } finally {
             setIsFetchingProducts(false);
         }
@@ -287,53 +360,69 @@ export const AdminShipments: React.FC = () => {
     const submitNewShipment = async (e: React.FormEvent) => {
         e.preventDefault();
         if (selectedProducts.length === 0) {
-            alert("Please add at least one product from the inventory to the shipment.");
+            toast.warn("Please add at least one product from the inventory to the shipment.");
             return;
         }
 
         const payload = {
             ...addForm,
             shipment_id: `SHP-${Math.floor(100000 + Math.random() * 900000)}`,
-            status: 'PROCESSING' as ShipStatus,
+            status: 'ACCEPTED' as ShipStatus,
             products: selectedProducts
         };
 
-        try {
-            if (API_CONFIG.USE_REAL_API) {
-                const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.CREATE_SHIPMENT}`, {
-                    method: 'POST',
-                    headers: DEFAULT_HEADERS,
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    const newShip = await res.json();
-                    setActiveShipments(prev => [newShip, ...prev]);
-                }
-            } else {
-                console.log("New Internal Shipment Payload:", payload);
-                const originCountryName = countries.find(c => c.id === addForm.originCountryId)?.name || '';
-                const originWarehouseName = warehouses.find(w => w.id === addForm.originWarehouseId)?.name || '';
+        const headers: Record<string, string> = {
+            ...DEFAULT_HEADERS,
+        };
 
-                setActiveShipments(prev => [{
-                    ...payload,
-                    originCountry: originCountryName,
-                    originAddress: originWarehouseName,
-                    senderName: 'GlobalTrade Logistics',
-                    senderPhone: 'Default Internal',
-                }, ...prev]);
-            }
-            alert(`Shipment ${payload.shipment_id} created successfully!`);
-
-            setAddForm({
-                originCountryId: '', originWarehouseId: '', destCountry: '', destAddress: '', recipientName: '', recipientPhone: '',
-                carrier: '', expect_date: '', weight: '', description: '', category: 'DIRECT'
-            });
-            setSelectedProducts([]);
-            setActiveTab('active');
-        } catch (err) {
-            console.error(err);
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        } else {
+            console.warn('No auth token available; request will be sent without Authorization header');
         }
-    };
+
+        try {
+            console.log(payload);
+            const response = await fetch(`${GLOBAL_BASE_URL}/shipment/saveShipment`, {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            const json = await response.json();
+            console.log(json);
+            if (response.ok) {
+
+                if (json.status) {
+                    toast.success(json.message);
+                    setActiveShipments(prev => [json.newShip, ...prev]);
+
+                    setAddForm({
+                        originCountryId: '', originWarehouseId: '', destCountry: '', destAddress: '', recipientName: '', recipientPhone: '',
+                        carrier: '', expect_date: '', weight: '', description: '', category: 'DIRECT'
+                    });
+                    setSelectedProducts([]);
+                    setActiveTab('active');
+                } else {
+                    toast.warn(json.message);
+                }
+
+            } else if (response.status == 400) {
+                console.log(response);
+                toast.error(json.message);
+            } else if (response.status == 401) {
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+            } else {
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+            }
+        } catch (error) {
+            toast.error("Something Wrong : " + error);
+            console.error("Error:", error);
+        }
+    }
 
     const handlePendingAction = async (
         shipment_id: string,

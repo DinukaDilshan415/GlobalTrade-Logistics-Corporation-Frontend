@@ -121,27 +121,10 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   CONSTRAINT `fk_inventory_warehouses1` FOREIGN KEY (`warehouses_id`) REFERENCES `warehouses` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.inventory: ~0 rows (approximately)
+-- Dumping data for table globaltrade_db.inventory: ~2 rows (approximately)
 REPLACE INTO `inventory` (`id`, `product_name`, `hs_code`, `quantity`, `unit_value`, `warehouses_id`) VALUES
-	(1, 'fddd', '455n4', 56, 45, 3),
-	(2, 'hhhh', '34cawx', 79, 55, 3);
-
--- Dumping structure for table globaltrade_db.refresh_token
-CREATE TABLE IF NOT EXISTS `refresh_token` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `createdAt` datetime(6) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `expiryAt` datetime(6) DEFAULT NULL,
-  `token` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `UK6t7skxndr9jtm3ckw71g75tfl` (`email`),
-  UNIQUE KEY `UK_r4k4edos30bx9neoq81mdvwph` (`token`),
-  UNIQUE KEY `UKr4k4edos30bx9neoq81mdvwph` (`token`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb3;
-
--- Dumping data for table globaltrade_db.refresh_token: ~0 rows (approximately)
-REPLACE INTO `refresh_token` (`id`, `createdAt`, `email`, `expiryAt`, `token`) VALUES
-	(13, '2026-08-22 05:07:53.993392', 'admin123', '2026-08-29 05:07:53.993392', 'f3fb5a0d580443e080513c7616ed546876b2591a6cd54c19b96b391c97ae4f8a');
+	(1, 'Monitors', 'HM-1212', 54, 120, 3),
+	(2, 'Smartwatch', 'SM-6454', 75, 55, 3);
 
 -- Dumping structure for table globaltrade_db.roles
 CREATE TABLE IF NOT EXISTS `roles` (
@@ -173,22 +156,27 @@ CREATE TABLE IF NOT EXISTS `shipment` (
   `updated_at` datetime NOT NULL,
   `origin_country_id` int NOT NULL,
   `dest_country_id` int NOT NULL,
+  `admin_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_shipment_country1_idx` (`origin_country_id`),
   KEY `fk_shipment_country2_idx` (`dest_country_id`),
+  KEY `fk_shipment_admin1_idx` (`admin_id`),
+  CONSTRAINT `fk_shipment_admin1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`id`),
   CONSTRAINT `fk_shipment_country1` FOREIGN KEY (`origin_country_id`) REFERENCES `country` (`id`),
   CONSTRAINT `fk_shipment_country2` FOREIGN KEY (`dest_country_id`) REFERENCES `country` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment: ~0 rows (approximately)
-REPLACE INTO `shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `recipient_name`, `recipient_phone`, `created_at`, `updated_at`, `origin_country_id`, `dest_country_id`) VALUES
-	(1, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', 'Samantha', '0762078415', '2026-08-22 06:51:37', '2026-08-22 06:51:37', 38, 34);
+-- Dumping data for table globaltrade_db.shipment: ~2 rows (approximately)
+REPLACE INTO `shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `recipient_name`, `recipient_phone`, `created_at`, `updated_at`, `origin_country_id`, `dest_country_id`, `admin_id`) VALUES
+	(1, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', 'Samantha', '0762078415', '2026-08-22 06:51:37', '2026-08-22 06:51:37', 38, 34, 1),
+	(3, 'SHP-495688', 'Global Air', '2026-08-30 00:00:00', 10, 'nothing special', 'Sri Lanka - GlobalTrade Katunayake Express', 'Global Trade Logistics Corporation', '0123456789', 'ul. Mazowiecka 45 m. 1200-052 Warszawa', 'Jan Kowalski', '48226543210', '2026-08-23 04:06:46', '2026-08-23 04:06:46', 38, 31, 1);
 
 -- Dumping structure for table globaltrade_db.shipment_items
 CREATE TABLE IF NOT EXISTS `shipment_items` (
   `id` int NOT NULL AUTO_INCREMENT,
   `ship_product_id` int DEFAULT NULL,
   `inventory_id` int DEFAULT NULL,
+  `quantity` int NOT NULL,
   `shipment_id` int NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_shipment_items_ship_product1_idx` (`ship_product_id`),
@@ -197,12 +185,14 @@ CREATE TABLE IF NOT EXISTS `shipment_items` (
   CONSTRAINT `fk_shipment_items_inventory1` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`),
   CONSTRAINT `fk_shipment_items_ship_product1` FOREIGN KEY (`ship_product_id`) REFERENCES `ship_product` (`id`),
   CONSTRAINT `fk_shipment_items_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment_items: ~0 rows (approximately)
-REPLACE INTO `shipment_items` (`id`, `ship_product_id`, `inventory_id`, `shipment_id`) VALUES
-	(1, 5, NULL, 1),
-	(2, 6, NULL, 1);
+-- Dumping data for table globaltrade_db.shipment_items: ~4 rows (approximately)
+REPLACE INTO `shipment_items` (`id`, `ship_product_id`, `inventory_id`, `quantity`, `shipment_id`) VALUES
+	(1, 5, NULL, 1, 1),
+	(2, 6, NULL, 1, 1),
+	(3, NULL, 1, 2, 3),
+	(4, NULL, 2, 4, 3);
 
 -- Dumping structure for table globaltrade_db.shipment_progress
 CREATE TABLE IF NOT EXISTS `shipment_progress` (
@@ -217,13 +207,14 @@ CREATE TABLE IF NOT EXISTS `shipment_progress` (
   KEY `fk_shipment_progress_shipment1_idx` (`shipment_id`),
   CONSTRAINT `fk_shipment_progress_ship_status1` FOREIGN KEY (`ship_status_id`) REFERENCES `ship_status` (`id`),
   CONSTRAINT `fk_shipment_progress_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment_progress: ~0 rows (approximately)
+-- Dumping data for table globaltrade_db.shipment_progress: ~4 rows (approximately)
 REPLACE INTO `shipment_progress` (`id`, `ship_status_id`, `location`, `description`, `shipment_id`, `created_at`) VALUES
 	(1, 1, 'From : Sri Lanka To : South Africa', 'Shipment Accepted By Global Trade Logistics Corporation', 1, '2026-08-22 06:51:37'),
 	(2, 4, 'GlobalTrade Katunayake Express', 'We are preparing your item for shipment', 1, '2026-08-22 10:10:24'),
-	(3, 5, 'katunayake airport', 'Your package is on its way', 1, '2026-08-22 10:38:21');
+	(3, 5, 'katunayake airport', 'Your package is on its way', 1, '2026-08-22 10:38:21'),
+	(4, 1, 'GlobalTrade Katunayake Express - Sri Lanka', 'Shipment Accepted By Global Trade Logistics Corporation', 3, '2026-08-23 04:06:46');
 
 -- Dumping structure for table globaltrade_db.ship_category
 CREATE TABLE IF NOT EXISTS `ship_category` (
@@ -252,8 +243,8 @@ CREATE TABLE IF NOT EXISTS `ship_product` (
 
 -- Dumping data for table globaltrade_db.ship_product: ~4 rows (approximately)
 REPLACE INTO `ship_product` (`id`, `name`, `hs_code`, `quantity`, `unit_value`, `vendor_shipment_id`) VALUES
-	(1, 'fddd', '455n4', 56, 45, 2),
-	(2, 'hhhh', '34cawx', 79, 55, 2),
+	(1, 'Monitors', 'HM-1212', 56, 120, 2),
+	(2, 'Smartwatch', 'SM-6454', 79, 55, 2),
 	(5, 'Laptop Cooling Pad', 'L-3443', 1, 10, 4),
 	(6, 'ASUS ExpertBook B1', 'L-1212', 1, 1000, 4);
 
