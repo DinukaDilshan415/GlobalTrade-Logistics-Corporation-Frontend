@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
     Search, Plus, CheckCircle2,
-    XCircle, MapPin,ChevronRight,
+    XCircle, MapPin, ChevronRight,
     Package, Loader2,
     Trash2, Box, ShoppingCart, PlusCircle, AlertCircle
 } from 'lucide-react';
@@ -199,7 +199,7 @@ export const AdminShipments: React.FC = () => {
                 const json = await response.json();
                 console.log(json);
 
-                if(json.status){
+                if (json.status) {
                     setPendingShipments(json.data);
                 }
 
@@ -383,28 +383,6 @@ export const AdminShipments: React.FC = () => {
         }
     }
 
-    // const handlePendingAction = async (shipment_id: string, action: 'ACCEPTED' | 'NOT_ACCEPTED') => {
-    //     try {
-    //         if (API_CONFIG.USE_REAL_API) {
-    //             await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_STATUS}`, {
-    //                 method: 'PATCH',
-    //                 headers: DEFAULT_HEADERS,
-    //                 body: JSON.stringify({ shipment_id, status: action })
-    //             });
-    //         }
-
-    //         // Local State Update
-    //         const shipmentToMove = pendingShipments.find(s => s.shipment_id === shipment_id);
-    //         setPendingShipments(prev => prev.filter(s => s.shipment_id !== shipment_id));
-
-    //         if (action === 'ACCEPTED' && shipmentToMove) {
-    //             setActiveShipments(prev => [{ ...shipmentToMove, status: 'ACCEPTED' }, ...prev]);
-    //         }
-    //     } catch (err) {
-    //         console.error(err);
-    //     }
-    // };
-
     const submitTrackingUpdate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedShipment) return;
@@ -414,25 +392,81 @@ export const AdminShipments: React.FC = () => {
             ...statusUpdateForm
         };
 
-        try {
-            if (API_CONFIG.USE_REAL_API) {
-                await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_STATUS}`, {
-                    method: 'PATCH',
-                    headers: DEFAULT_HEADERS,
-                    body: JSON.stringify(payload)
-                });
-            } else {
-                console.log("Status Update Payload:", payload);
-            }
+        console.log(payload);
 
-            setActiveShipments(prev => prev.map(s => s.shipment_id === payload.shipment_id ? { ...s, status: payload.status } : s));
-            setUpdateModalOpen(false);
-            setStatusUpdateForm({ status: 'IN_TRANSIT', location: '', description: '' });
-            alert("Shipment tracking updated successfully!");
-        } catch (err) {
-            console.error(err);
+        const headers: Record<string, string> = {
+            ...DEFAULT_HEADERS,
+        };
+
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        } else {
+            console.warn('No auth token available; request will be sent without Authorization header');
         }
-    };
+
+        try {
+            const response = await fetch(`${GLOBAL_BASE_URL}/shipment/updateProgress`, {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            const json = await response.json();
+            console.log(json);
+            if (response.ok) {
+
+                if (json.status) {
+                    toast.success(json.message);
+
+                    setActiveShipments(prev => prev.map(s => s.shipment_id === payload.shipment_id ? { ...s, status: payload.status } : s));
+                    setUpdateModalOpen(false);
+                    setStatusUpdateForm({ status: 'IN_TRANSIT', location: '', description: '' });
+                } else {
+                    toast.warn(json.message);
+                }
+
+            } else if (response.status == 400) {
+                console.log(response);
+                toast.error(json.message);
+            } else {
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+            }
+        } catch (error) {
+            toast.error("Something Wrong : " + error);
+            console.error("Error:", error);
+        }
+    }
+
+    // const submitTrackingUpdate = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     if (!selectedShipment) return;
+
+    //     const payload = {
+    //         shipment_id: selectedShipment.shipment_id,
+    //         ...statusUpdateForm
+    //     };
+
+    //     try {
+    //         if (API_CONFIG.USE_REAL_API) {
+    //             await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_STATUS}`, {
+    //                 method: 'PATCH',
+    //                 headers: DEFAULT_HEADERS,
+    //                 body: JSON.stringify(payload)
+    //             });
+    //         } else {
+    //             console.log("Status Update Payload:", payload);
+    //         }
+
+    //         setActiveShipments(prev => prev.map(s => s.shipment_id === payload.shipment_id ? { ...s, status: payload.status } : s));
+    //         setUpdateModalOpen(false);
+    //         setStatusUpdateForm({ status: 'IN_TRANSIT', location: '', description: '' });
+    //         alert("Shipment tracking updated successfully!");
+    //     } catch (err) {
+    //         console.error(err);
+    //     }
+    // };
 
     // --- Helper: Status Styles ---
     const getStatusBadge = (status: ShipStatus) => {
@@ -498,7 +532,7 @@ export const AdminShipments: React.FC = () => {
                                                     <button onClick={() => handlePendingAction(s.shipment_id, s.category, 'NOT_ACCEPTED')} className="p-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-lg" title="Reject"><XCircle className="w-4 h-4" /></button>
                                                 </>
                                             ) : (
-                                                <button onClick={() => { setSelectedShipment(s); setStatusUpdateForm({ ...statusUpdateForm, status: s.status }); setUpdateModalOpen(true); }} className="px-3 py-1.5 text-xs font-bold text-globlePrimary border border-globlePrimary rounded-lg hover:bg-globlePrimary hover:text-white transition-colors">
+                                                <button onClick={() => { setSelectedShipment(s); setStatusUpdateForm({ ...statusUpdateForm, }); setUpdateModalOpen(true); }} className="px-3 py-1.5 text-xs font-bold text-globlePrimary border border-globlePrimary rounded-lg hover:bg-globlePrimary hover:text-white transition-colors">
                                                     Update Status
                                                 </button>
                                             )}
