@@ -119,12 +119,31 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   PRIMARY KEY (`id`),
   KEY `fk_inventory_warehouses1_idx` (`warehouses_id`),
   CONSTRAINT `fk_inventory_warehouses1` FOREIGN KEY (`warehouses_id`) REFERENCES `warehouses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.inventory: ~2 rows (approximately)
+-- Dumping data for table globaltrade_db.inventory: ~4 rows (approximately)
 REPLACE INTO `inventory` (`id`, `product_name`, `hs_code`, `quantity`, `unit_value`, `warehouses_id`) VALUES
-	(1, 'Monitors', 'HM-1212', 54, 120, 3),
-	(2, 'Smartwatch', 'SM-6454', 75, 55, 3);
+	(1, 'Monitors', '8507.60.00', 54, 120, 3),
+	(2, 'Smartwatch', '8544.70.00', 75, 55, 3),
+	(3, 'TV', '8543.23.01', 25, 950, 9),
+	(5, 'Printers', '8722.02.00', 50, 145, 13);
+
+-- Dumping structure for table globaltrade_db.refresh_token
+CREATE TABLE IF NOT EXISTS `refresh_token` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `createdAt` datetime(6) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `expiryAt` datetime(6) DEFAULT NULL,
+  `token` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK6t7skxndr9jtm3ckw71g75tfl` (`email`),
+  UNIQUE KEY `UK_r4k4edos30bx9neoq81mdvwph` (`token`),
+  UNIQUE KEY `UKr4k4edos30bx9neoq81mdvwph` (`token`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.refresh_token: ~1 rows (approximately)
+REPLACE INTO `refresh_token` (`id`, `createdAt`, `email`, `expiryAt`, `token`) VALUES
+	(20, '2026-08-23 03:05:58.430079', 'admin123', '2026-08-30 03:05:58.430079', '3772b200efa745b69fc0a9981e28a710bf65a35f5ff84c808f481961eb3992e9');
 
 -- Dumping structure for table globaltrade_db.roles
 CREATE TABLE IF NOT EXISTS `roles` (
@@ -166,7 +185,7 @@ CREATE TABLE IF NOT EXISTS `shipment` (
   CONSTRAINT `fk_shipment_country2` FOREIGN KEY (`dest_country_id`) REFERENCES `country` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment: ~2 rows (approximately)
+-- Dumping data for table globaltrade_db.shipment: ~3 rows (approximately)
 REPLACE INTO `shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `recipient_name`, `recipient_phone`, `created_at`, `updated_at`, `origin_country_id`, `dest_country_id`, `admin_id`) VALUES
 	(1, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', 'Samantha', '0762078415', '2026-08-22 06:51:37', '2026-08-22 06:51:37', 38, 34, 1),
 	(3, 'SHP-495688', 'Global Air', '2026-08-30 00:00:00', 10, 'nothing special', 'Sri Lanka - GlobalTrade Katunayake Express', 'Global Trade Logistics Corporation', '0123456789', 'ul. Mazowiecka 45 m. 1200-052 Warszawa', 'Jan Kowalski', '48226543210', '2026-08-23 04:06:46', '2026-08-23 04:06:46', 38, 31, 1);
@@ -243,10 +262,10 @@ CREATE TABLE IF NOT EXISTS `ship_product` (
 
 -- Dumping data for table globaltrade_db.ship_product: ~4 rows (approximately)
 REPLACE INTO `ship_product` (`id`, `name`, `hs_code`, `quantity`, `unit_value`, `vendor_shipment_id`) VALUES
-	(1, 'Monitors', 'HM-1212', 56, 120, 2),
-	(2, 'Smartwatch', 'SM-6454', 79, 55, 2),
-	(5, 'Laptop Cooling Pad', 'L-3443', 1, 10, 4),
-	(6, 'ASUS ExpertBook B1', 'L-1212', 1, 1000, 4);
+	(1, 'Monitors', '8507.60.00', 56, 120, 2),
+	(2, 'Smartwatch', '8544.70.00', 79, 55, 2),
+	(5, 'Laptop Cooling Pad', '8413.50.90', 1, 10, 4),
+	(6, 'ASUS ExpertBook B1', '8542.31.00', 1, 1000, 4);
 
 -- Dumping structure for table globaltrade_db.ship_status
 CREATE TABLE IF NOT EXISTS `ship_status` (
