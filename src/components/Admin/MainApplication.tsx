@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import VendorsManagement from './DashBoardComponents/VendorsManagement';
 import AdminShipments from './DashBoardComponents/AdminShipments';
+import InventoryManagement from './DashBoardComponents/InventoryManagement';
 
 // Define available routes matching the sidebar
 type Route =
@@ -103,24 +104,7 @@ export const MainApplication: React.FC = () => {
 
     const InventoryView = () => (
         <div className="animate-in fade-in duration-300">
-            <PageHeader title="Global Inventory" description="Monitor warehouse stock levels, capacity, and replenishment alerts." actionLabel="Add Stock" />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                    { name: 'Colombo Central Hub', capacity: '85%', items: '42,000' },
-                    { name: 'Shanghai Gateway', capacity: '92%', items: '115,000' },
-                    { name: 'Dubai Transit Point', capacity: '45%', items: '18,500' },
-                ].map((wh, idx) => (
-                    <div key={idx} className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center"><Package className="w-5 h-5 text-slate-600" /></div>
-                            <h3 className="font-bold text-slate-900">{wh.name}</h3>
-                        </div>
-                        <div className="mb-2 flex justify-between text-sm"><span className="text-slate-500 font-medium">Capacity</span><span className="font-bold">{wh.capacity}</span></div>
-                        <div className="w-full bg-slate-100 rounded-full h-2 mb-4"><div className={`h-2 rounded-full ${parseInt(wh.capacity) > 90 ? 'bg-red-500' : 'bg-globleSecondary'}`} style={{ width: wh.capacity }}></div></div>
-                        <div className="text-sm font-medium text-slate-600 border-t border-slate-100 pt-4 mt-2">Active Items: <span className="font-bold text-slate-900">{wh.items}</span></div>
-                    </div>
-                ))}
-            </div>
+            <InventoryManagement/>
         </div>
     );
 
