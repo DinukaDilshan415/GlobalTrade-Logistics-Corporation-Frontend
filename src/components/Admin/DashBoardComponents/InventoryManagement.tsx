@@ -280,56 +280,7 @@ export const InventoryManagement: React.FC = () => {
             setIsSubmitting(false);
         }
     }
-
-    // const handleSubmit = async (e: React.FormEvent) => {
-    //     e.preventDefault();
-    //     if (!formData.warehouses_id) {
-    //         alert("Please select a valid warehouse.");
-    //         return;
-    //     }
-
-    //     setIsSubmitting(true);
-    //     const payload = {
-    //         product_name: formData.product_name,
-    //         hs_code: formData.hs_code,
-    //         quantity: parseInt(formData.quantity) || 0,
-    //         unit_value: parseFloat(formData.unit_value) || 0.0,
-    //         warehouses_id: parseInt(formData.warehouses_id)
-    //     };
-
-    //     try {
-    //         if (API_CONFIG.USE_REAL_API) {
-    //             if (editingItem) {
-    //                 await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.UPDATE_INVENTORY}${editingItem.id}`, {
-    //                     method: 'PUT',
-    //                     headers: DEFAULT_HEADERS,
-    //                     body: JSON.stringify(payload)
-    //                 });
-    //             } else {
-    //                 await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.ADD_INVENTORY}`, {
-    //                     method: 'POST',
-    //                     headers: DEFAULT_HEADERS,
-    //                     body: JSON.stringify(payload)
-    //                 });
-    //             }
-    //             await fetchInventory();
-    //         } else {
-    //             await new Promise(resolve => setTimeout(resolve, 500));
-    //             if (editingItem) {
-    //                 setInventory(prev => prev.map(item => item.id === editingItem.id ? { ...payload, id: editingItem.id } : item));
-    //             } else {
-    //                 const newItem: InventoryItem = { ...payload, id: Math.floor(100 + Math.random() * 900) };
-    //                 setInventory(prev => [newItem, ...prev]);
-    //             }
-    //         }
-    //         closeModal();
-    //     } catch (err) {
-    //         console.error('Error saving inventory item:', err);
-    //     } finally {
-    //         setIsSubmitting(false);
-    //     }
-    // };
-
+    
     // 4. Handle Delete
     const handleDelete = async (id: number) => {
         if (!window.confirm(`Are you sure you want to delete inventory item #${id}?`)) return;

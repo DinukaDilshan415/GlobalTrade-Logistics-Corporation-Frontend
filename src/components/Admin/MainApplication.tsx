@@ -9,6 +9,7 @@ import {
 import VendorsManagement from './DashBoardComponents/VendorsManagement';
 import AdminShipments from './DashBoardComponents/AdminShipments';
 import InventoryManagement from './DashBoardComponents/InventoryManagement';
+import CustomsCompliance from './DashBoardComponents/CustomsCompliance';
 
 // Define available routes matching the sidebar
 type Route =
@@ -98,13 +99,19 @@ export const MainApplication: React.FC = () => {
 
     const ShipmentsView = () => (
         <div className="animate-in fade-in duration-300">
-            <AdminShipments/>
+            <AdminShipments />
         </div>
     );
 
     const InventoryView = () => (
         <div className="animate-in fade-in duration-300">
-            <InventoryManagement/>
+            <InventoryManagement />
+        </div>
+    );
+
+    const CustomsComplianceView = () => (
+        <div className="animate-in fade-in duration-300">
+            <CustomsCompliance />
         </div>
     );
 
@@ -150,7 +157,7 @@ export const MainApplication: React.FC = () => {
 
     const VendorView = () => (
         <div className="animate-in fade-in duration-300">
-            <VendorsManagement/>
+            <VendorsManagement />
         </div>
     );
 
@@ -169,8 +176,8 @@ export const MainApplication: React.FC = () => {
             case 'shipments': return <ShipmentsView />;
             case 'inventory': return <InventoryView />;
             case 'exceptions': return <ExceptionsView />;
-            case 'vendors': return <VendorView/>;
-            case 'customs': return <GenericView title="Customs & Compliance" icon={ClipboardCheck} />;
+            case 'vendors': return <VendorView />;
+            case 'customs': return <CustomsComplianceView/>;
             case 'routes': return <GenericView title="Route Optimization" icon={Map} />;
             case 'alerts': return <GenericView title="System Alerts" icon={Bell} />;
             case 'audit-logs': return <GenericView title="Audit & Security Logs" icon={ScrollText} />;
