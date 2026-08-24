@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ClipboardCheck, Search, ShieldAlert, 
-  FileText, Upload, CheckCircle2, Clock, 
-  AlertTriangle, User, DollarSign, Calendar, 
+import {
+  ClipboardCheck, Search, ShieldAlert,
+  FileText, Upload, CheckCircle2, Clock,
+  AlertTriangle, User, DollarSign, Calendar,
   ArrowRight, X, Loader2, Eye, FileCheck,
-  RefreshCw, AlertCircle, ExternalLink, Download
+  RefreshCw, AlertCircle, ExternalLink
 } from 'lucide-react';
-
-// --- API Configuration ---
-const GLOBAL_BASE_URL = 'http://localhost:8080/api/v1';
-const DEFAULT_HEADERS = { 'Content-Type': 'application/json' };
+import { toast } from 'react-toastify';
+import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from '../../../api/client';
+import { useAuth } from '../../context/AuthContext';
 
 const API_CONFIG = {
-  USE_REAL_API: false,
+  USE_REAL_API: true,
   ENDPOINTS: {
     GET_CASES: '/customs/cases',
     GET_CASE_DETAILS: '/customs/cases/',
@@ -21,8 +20,8 @@ const API_CONFIG = {
   }
 };
 
-type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH';
-type CaseStatus = 'PENDING_REVIEW' | 'REQUIRED_DOCUMENTS' | 'SUBMITTED' | 'CLEARED' | 'REJECTED';
+type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | '-';
+type CaseStatus = 'UNDER_REVIEW' | 'DOCUMENTS_REQUIRED' | 'SUBMITTED' | 'CLEARED' | 'REJECTED' | 'APPROVED' | 'CUSTOMS_REVIEW';
 
 interface CustomsCase {
   id: number;
@@ -65,48 +64,119 @@ export const CustomsCompliance: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<{ [key: string]: File | null }>({});
   const [existingDocuments, setExistingDocuments] = useState<{ [key: string]: string } | null>(null);
 
+  const { token, setAuth } = useAuth();
+
+  const tryRefresh = async () => {
+    try {
+      const response = await fetch(`${GLOBAL_BASE_URL}/auth/refresh`, {
+        method: "POST",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const json = await response.json();
+        console.log(json);
+        setAuth(json.accessToken, json.roles);
+      } else if (response.status == 401) {
+        setAuth(null, []);
+        window.location.href = "/login";
+      } else {
+        console.log(response);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   // --- 1. Fetch Customs Cases ---
   const fetchCases = async () => {
     setIsLoading(true);
     try {
-      if (API_CONFIG.USE_REAL_API) {
-        const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_CASES}`, {
-          method: 'GET',
-          headers: DEFAULT_HEADERS
-        });
-        if (res.ok) setCases(await res.json());
+      const headers: Record<string, string> = {
+        ...DEFAULT_HEADERS,
+      };
+
+      if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
       } else {
-        await new Promise(resolve => setTimeout(resolve, 600));
-        setCases([
-          {
-            id: 1, caseNumber: 'CUS-2026-0891', shipmentId: 'SHP-10024',
-            customsValue: 45000.00, dutyAmount: 6750.00, riskLevel: 'HIGH',
-            submittedDate: '2026-08-15', deadline: '2026-08-22', clearedDate: null,
-            assignedOfficer: 'Officer J. Perera', remarks: 'High value electronics requiring mandatory chemical and battery declaration certs.',
-            status: 'REQUIRED_DOCUMENTS'
-          },
-          {
-            id: 2, caseNumber: 'CUS-2026-0892', shipmentId: 'SHP-10025',
-            customsValue: 12400.00, dutyAmount: 1860.00, riskLevel: 'LOW',
-            submittedDate: '2026-08-16', deadline: '2026-08-25', clearedDate: null,
-            assignedOfficer: 'Officer M. Silva', remarks: 'Standard textile freight. Awaiting initial document verification by assigned agent.',
-            status: 'PENDING_REVIEW'
-          },
-          {
-            id: 3, caseNumber: 'CUS-2026-0888', shipmentId: 'SHP-9022',
-            customsValue: 89000.00, dutyAmount: 13350.00, riskLevel: 'MEDIUM',
-            submittedDate: '2026-08-10', deadline: '2026-08-18', clearedDate: '2026-08-17',
-            assignedOfficer: 'Officer K. Fernando', remarks: 'All clearance permits verified. Tariffs paid in full.',
-            status: 'CLEARED'
-          }
-        ]);
+        console.warn('No auth token available; request will be sent without Authorization header');
       }
-    } catch (err) {
-      console.error('Error fetching customs cases:', err);
+
+      const response = await fetch(`${GLOBAL_BASE_URL}/custom/getAllCases`, {
+        method: "GET",
+        credentials: "include",
+        headers,
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        console.log(json);
+
+        if (json.status) {
+          setCases(json.data);
+        }
+      } else if (response.status == 401) {
+        console.log(response);
+        tryRefresh();
+      } else {
+        console.log(response);
+        toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+      }
+    } catch (error) {
+      toast.error("Something Wrong : " + error);
+      console.error("Error:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+
+  // const fetchCases = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     if (API_CONFIG.USE_REAL_API) {
+  //       const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_CASES}`, {
+  //         method: 'GET',
+  //         headers: DEFAULT_HEADERS
+  //       });
+  //       if (res.ok) setCases(await res.json());
+  //     } else {
+  //       await new Promise(resolve => setTimeout(resolve, 600));
+  //       setCases([
+  //         {
+  //           id: 1, caseNumber: 'CUS-2026-0891', shipmentId: 'SHP-10024',
+  //           customsValue: 45000.00, dutyAmount: 6750.00, riskLevel: 'HIGH',
+  //           submittedDate: '2026-08-15', deadline: '2026-08-22', 
+  //           clearedDate: null,
+  //           assignedOfficer: 'Officer J. Perera', 
+  //           remarks: 'High value electronics requiring mandatory chemical and battery declaration certs.',
+  //           status: 'REQUIRED_DOCUMENTS'
+  //         },
+  //         {
+  //           id: 2, caseNumber: 'CUS-2026-0892', shipmentId: 'SHP-10025',
+  //           customsValue: 12400.00, dutyAmount: 1860.00, riskLevel: 'LOW',
+  //           submittedDate: '2026-08-16', deadline: '2026-08-25', 
+  //           clearedDate: null,
+  //           assignedOfficer: 'Officer M. Silva', 
+  //           remarks: 'Standard textile freight. Awaiting initial document verification by assigned agent.',
+  //           status: 'PENDING_REVIEW'
+  //         },
+  //         {
+  //           id: 3, caseNumber: 'CUS-2026-0888', shipmentId: 'SHP-9022',
+  //           customsValue: 89000.00, dutyAmount: 13350.00, riskLevel: 'MEDIUM',
+  //           submittedDate: '2026-08-10', deadline: '2026-08-18', 
+  //           clearedDate: '2026-08-17',
+  //           assignedOfficer: 'Officer K. Fernando', 
+  //           remarks: 'All clearance permits verified. Tariffs paid in full.',
+  //           status: 'CLEARED'
+  //         }
+  //       ]);
+  //     }
+  //   } catch (err) {
+  //     console.error('Error fetching customs cases:', err);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   useEffect(() => {
     fetchCases();
@@ -116,7 +186,7 @@ export const CustomsCompliance: React.FC = () => {
   const openCaseDetails = async (c: CustomsCase) => {
     setSelectedCase(c);
     setIsModalOpen(true);
-    
+
     // Reset states
     setUploadedFiles({
       commercialInvoice: null, certOfOrigin: null, permit: null,
@@ -125,7 +195,7 @@ export const CustomsCompliance: React.FC = () => {
     setExistingDocuments(null);
 
     // If status is NOT 'REQUIRED_DOCUMENTS', fetch the already uploaded documents
-    if (c.status !== 'REQUIRED_DOCUMENTS') {
+    if (c.status !== 'DOCUMENTS_REQUIRED') {
       setIsFetchingDocs(true);
       try {
         if (API_CONFIG.USE_REAL_API) {
@@ -191,7 +261,7 @@ export const CustomsCompliance: React.FC = () => {
       // Optimistic UI Update
       setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, status: 'SUBMITTED' } : c));
       setSelectedCase(prev => prev ? { ...prev, status: 'SUBMITTED' } : null);
-      
+
       alert(`All 6 documents verified. Case ${selectedCase.caseNumber} status updated to SUBMITTED.`);
       setIsModalOpen(false);
     } catch (err) {
@@ -204,11 +274,13 @@ export const CustomsCompliance: React.FC = () => {
   // --- Helpers for Styling ---
   const getStatusBadge = (status: CaseStatus) => {
     switch (status) {
-      case 'REQUIRED_DOCUMENTS': return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'SUBMITTED': return 'bg-[#0096ed]/10 text-[#0096ed] border-[#0096ed]/20';
-      case 'CLEARED': return 'bg-[#b2d235]/20 text-lime-700 border-[#b2d235]/40';
-      case 'PENDING_REVIEW': return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'DOCUMENTS_REQUIRED': return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'SUBMITTED': return 'bg-globlePrimary/10 text-globlePrimary border-globlePrimary/20';
+      case 'CLEARED': return 'bg-globleSecondary/20 text-lime-700 border-globleSecondary/40';
+      case 'UNDER_REVIEW': return 'bg-purple-50 text-purple-700 border-purple-200';
+      case 'CUSTOMS_REVIEW': return 'bg-emerald-500 text-white border-emerald-200';
       case 'REJECTED': return 'bg-red-50 text-red-700 border-red-200';
+      case "APPROVED" : return 'bg-lime-500 text-white border-lime-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
@@ -223,21 +295,21 @@ export const CustomsCompliance: React.FC = () => {
 
   // Filtering
   const filteredCases = cases.filter(c => {
-    const matchesSearch = c.caseNumber.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          c.shipmentId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
+    const matchesSearch = c.caseNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      c.shipmentId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter == 'ALL' || c.status == statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="min-h-screen bg-slate-50/50 p-4 sm:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-300">
-        
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-              <ClipboardCheck className="w-8 h-8 text-[#0096ed]" /> Customs & Compliance
+              <ClipboardCheck className="w-8 h-8 text-globlePrimary" /> Customs & Compliance
             </h1>
             <p className="text-sm text-slate-500 mt-1">
               International trade regulations, port clearance audits, duty calculations, and document submission.
@@ -255,12 +327,12 @@ export const CustomsCompliance: React.FC = () => {
               <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Audits</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{cases.length}</h3>
             </div>
-            <div className="p-3 bg-[#0096ed]/10 text-[#0096ed] rounded-xl"><FileText className="w-5 h-5" /></div>
+            <div className="p-3 bg-globlePrimary/10 text-globlePrimary rounded-xl"><FileText className="w-5 h-5" /></div>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-amber-600 uppercase tracking-wider">Requires Docs</p>
-              <h3 className="text-2xl font-black text-amber-600 mt-1">{cases.filter(c => c.status === 'REQUIRED_DOCUMENTS').length}</h3>
+              <h3 className="text-2xl font-black text-amber-600 mt-1">{cases.filter(c => c.status === 'DOCUMENTS_REQUIRED').length}</h3>
             </div>
             <div className="p-3 bg-amber-50 text-amber-600 rounded-xl"><AlertTriangle className="w-5 h-5" /></div>
           </div>
@@ -269,7 +341,7 @@ export const CustomsCompliance: React.FC = () => {
               <p className="text-xs font-bold text-lime-700 uppercase tracking-wider">Cleared Cases</p>
               <h3 className="text-2xl font-black text-slate-900 mt-1">{cases.filter(c => c.status === 'CLEARED').length}</h3>
             </div>
-            <div className="p-3 bg-[#b2d235]/20 text-lime-700 rounded-xl"><CheckCircle2 className="w-5 h-5" /></div>
+            <div className="p-3 bg-globleSecondary/20 text-lime-700 rounded-xl"><CheckCircle2 className="w-5 h-5" /></div>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
             <div>
@@ -292,28 +364,31 @@ export const CustomsCompliance: React.FC = () => {
                   placeholder="Search Case #, Shipment ID..."
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:border-[#0096ed] outline-none shadow-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:border-globlePrimary outline-none shadow-sm"
                 />
               </div>
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
-                className="w-full sm:w-56 py-2 px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:border-[#0096ed] outline-none shadow-sm cursor-pointer"
+                className="w-full sm:w-56 py-2 px-3 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:border-globlePrimary outline-none shadow-sm cursor-pointer"
               >
                 <option value="ALL">All Statuses</option>
-                <option value="REQUIRED_DOCUMENTS">Required Documents</option>
-                <option value="PENDING_REVIEW">Pending Review</option>
+                <option value="DOCUMENTS_REQUIRED">Required Documents</option>
+                <option value="UNDER_REVIEW">Pending Review</option>
+                <option value="CUSTOMS_REVIEW">Customs Review</option>
                 <option value="SUBMITTED">Submitted</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="APPROVED">Approved</option>
                 <option value="CLEARED">Cleared</option>
               </select>
             </div>
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto min-h-[350px]">
+          <div className="overflow-x-auto min-h-87.5">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center h-64 text-slate-400">
-                <Loader2 className="w-8 h-8 animate-spin text-[#0096ed] mb-3" />
+                <Loader2 className="w-8 h-8 animate-spin text-globlePrimary mb-3" />
                 <p className="text-sm font-semibold uppercase tracking-wider">Syncing Compliance Registry...</p>
               </div>
             ) : filteredCases.length === 0 ? (
@@ -322,7 +397,7 @@ export const CustomsCompliance: React.FC = () => {
                 <p className="text-sm font-bold text-slate-500">No customs cases found matching query.</p>
               </div>
             ) : (
-              <table className="w-full text-left border-collapse min-w-[1000px]">
+              <table className="w-full text-left border-collapse min-w-250">
                 <thead>
                   <tr className="bg-white border-b border-slate-200 text-xs uppercase tracking-wider text-slate-400 font-extrabold">
                     <th className="p-4 pl-6">Case & Shipment</th>
@@ -338,7 +413,7 @@ export const CustomsCompliance: React.FC = () => {
                   {filteredCases.map(c => (
                     <tr key={c.id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="p-4 pl-6">
-                        <div className="font-bold text-slate-900 group-hover:text-[#0096ed] transition-colors">{c.caseNumber}</div>
+                        <div className="font-bold text-slate-900 group-hover:text-globlePrimary transition-colors">{c.caseNumber}</div>
                         <div className="text-xs text-slate-500 font-mono mt-0.5">{c.shipmentId}</div>
                       </td>
                       <td className="p-4">
@@ -355,7 +430,7 @@ export const CustomsCompliance: React.FC = () => {
                         {c.clearedDate && <div className="text-[11px] text-lime-700 font-bold mt-0.5">Cleared: {c.clearedDate}</div>}
                       </td>
                       <td className="p-4">
-                        <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-[#0096ed]" /> {c.assignedOfficer}</div>
+                        <div className="text-xs font-semibold text-slate-800 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-globlePrimary" /> {c.assignedOfficer}</div>
                       </td>
                       <td className="p-4">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusBadge(c.status)}`}>
@@ -363,7 +438,7 @@ export const CustomsCompliance: React.FC = () => {
                         </span>
                       </td>
                       <td className="p-4 pr-6 text-right">
-                        <button onClick={() => openCaseDetails(c)} className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-[#0096ed] hover:bg-[#0096ed]/5 text-[#0096ed] rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 ml-auto">
+                        <button onClick={() => openCaseDetails(c)} className="px-3.5 py-1.5 bg-white border border-slate-200 hover:border-globlePrimary hover:bg-globlePrimary/5 text-globlePrimary rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1 ml-auto">
                           <Eye className="w-3.5 h-3.5" /> View Case
                         </button>
                       </td>
@@ -380,10 +455,10 @@ export const CustomsCompliance: React.FC = () => {
       {isModalOpen && selectedCase && (
         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-4xl overflow-hidden my-8 animate-in zoom-in-95 duration-200">
-            
+
             {/* Modal Header */}
             <div className="p-6 bg-slate-900 text-white flex justify-between items-start relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-[#0096ed]/20 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-globlePrimary/20 rounded-full blur-3xl pointer-events-none" />
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-1">
                   <h3 className="font-extrabold text-xl text-white">{selectedCase.caseNumber}</h3>
@@ -399,13 +474,13 @@ export const CustomsCompliance: React.FC = () => {
             </div>
 
             <div className="p-6 sm:p-8 space-y-8 max-h-[80vh] overflow-y-auto">
-              
+
               {/* COMPREHENSIVE CASE DETAILS GRID */}
               <div className="space-y-4">
                 <h4 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2 border-b border-slate-100 pb-2">
-                  <AlertCircle className="w-4 h-4 text-[#0096ed]" /> Full Case Details
+                  <AlertCircle className="w-4 h-4 text-globlePrimary" /> Full Case Details
                 </h4>
-                
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-200">
                   <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Customs Value</p>
@@ -421,9 +496,9 @@ export const CustomsCompliance: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Assigned Officer</p>
-                    <p className="text-sm font-bold text-slate-900 mt-0.5 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-[#0096ed]" /> {selectedCase.assignedOfficer}</p>
+                    <p className="text-sm font-bold text-slate-900 mt-0.5 flex items-center gap-1.5"><User className="w-3.5 h-3.5 text-globlePrimary" /> {selectedCase.assignedOfficer}</p>
                   </div>
-                  
+
                   <div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase">Submitted Date</p>
                     <p className="text-sm font-bold text-slate-900 mt-0.5 flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-slate-400" /> {selectedCase.submittedDate}</p>
@@ -452,18 +527,18 @@ export const CustomsCompliance: React.FC = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <h4 className="text-sm font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                    <FileCheck className="w-4 h-4 text-[#0096ed]" /> Customs Documents
+                    <FileCheck className="w-4 h-4 text-globlePrimary" /> Customs Documents
                   </h4>
                 </div>
 
                 {/* SCENARIO A: Status is REQUIRED_DOCUMENTS -> Show Upload Form */}
-                {selectedCase.status === 'REQUIRED_DOCUMENTS' ? (
+                {selectedCase.status === 'DOCUMENTS_REQUIRED' ? (
                   <form onSubmit={handleSubmitDocuments} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {REQUIRED_DOC_TYPES.map((doc, idx) => {
                         const file = uploadedFiles[doc.key];
                         return (
-                          <div key={doc.key} className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${file ? 'border-[#b2d235] bg-[#b2d235]/10' : 'border-slate-200 bg-slate-50'}`}>
+                          <div key={doc.key} className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${file ? 'border-globleSecondary bg-globleSecondary/10' : 'border-slate-200 bg-slate-50'}`}>
                             <div className="flex items-start justify-between mb-3">
                               <div className="flex items-center gap-2">
                                 <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 font-bold text-[10px] flex items-center justify-center">{idx + 1}</span>
@@ -477,9 +552,9 @@ export const CustomsCompliance: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-3">
                               <label className="flex-1 cursor-pointer">
-                                <div className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-slate-200 hover:border-[#0096ed] rounded-xl text-xs font-semibold text-slate-600 transition-colors shadow-sm">
+                                <div className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-slate-200 hover:border-globlePrimary rounded-xl text-xs font-semibold text-slate-600 transition-colors shadow-sm">
                                   <Upload className="w-3.5 h-3.5 text-slate-400" />
-                                  <span className="truncate max-w-[180px]">{file ? file.name : 'Choose PDF / DOCX...'}</span>
+                                  <span className="truncate max-w-45">{file ? file.name : 'Choose PDF / DOCX...'}</span>
                                 </div>
                                 <input type="file" className="hidden" accept=".pdf,.docx,.png,.jpg" onChange={e => handleFileChange(doc.key, e.target.files?.[0] || null)} />
                               </label>
@@ -496,30 +571,30 @@ export const CustomsCompliance: React.FC = () => {
                       <p className="text-xs text-slate-500">Submitting updates status to <span className="font-bold text-slate-800">"SUBMITTED"</span>.</p>
                       <div className="flex items-center gap-3 w-full sm:w-auto">
                         <button type="button" onClick={() => setIsModalOpen(false)} className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors text-sm">Cancel</button>
-                        <button type="submit" disabled={!allDocsUploaded || isSubmittingDocs} className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white text-sm bg-[#0096ed] hover:bg-[#0082ce] shadow-md shadow-[#0096ed]/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <button type="submit" disabled={!allDocsUploaded || isSubmittingDocs} className="w-full sm:w-auto px-6 py-2.5 rounded-xl font-bold text-white text-sm bg-globlePrimary hover:bg-[#0082ce] shadow-md shadow-globlePrimary/25 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
                           {isSubmittingDocs ? <><Loader2 className="w-4 h-4 animate-spin" /> Verifying...</> : <>Submit Documentation <ArrowRight className="w-4 h-4" /></>}
                         </button>
                       </div>
                     </div>
                   </form>
                 ) : (
-                  
+
                   /* SCENARIO B: Status is NOT REQUIRED_DOCUMENTS -> Show Fetched Existing Documents */
                   <div>
                     {isFetchingDocs ? (
                       <div className="flex flex-col items-center justify-center py-10 text-slate-400">
-                        <Loader2 className="w-8 h-8 animate-spin text-[#0096ed] mb-3" />
+                        <Loader2 className="w-8 h-8 animate-spin text-globlePrimary mb-3" />
                         <p className="text-sm font-semibold uppercase tracking-wider">Retrieving Vault Documents...</p>
                       </div>
                     ) : existingDocuments ? (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {REQUIRED_DOC_TYPES.map((doc, idx) => {
+                        {REQUIRED_DOC_TYPES.map((doc) => {
                           const docUrl = existingDocuments[doc.key];
                           return (
-                            <div key={doc.key} className="p-4 rounded-2xl border border-slate-200 bg-white flex items-center justify-between group hover:border-[#0096ed]/40 transition-colors shadow-sm">
+                            <div key={doc.key} className="p-4 rounded-2xl border border-slate-200 bg-white flex items-center justify-between group hover:border-globlePrimary/40 transition-colors shadow-sm">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
-                                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-[#0096ed] transition-colors" />
+                                  <FileText className="w-5 h-5 text-slate-400 group-hover:text-globlePrimary transition-colors" />
                                 </div>
                                 <div>
                                   <p className="text-xs font-bold text-slate-900">{doc.label}</p>
@@ -527,11 +602,11 @@ export const CustomsCompliance: React.FC = () => {
                                 </div>
                               </div>
                               {docUrl ? (
-                                <a 
-                                  href={docUrl} 
-                                  target="_blank" 
+                                <a
+                                  href={docUrl}
+                                  target="_blank"
                                   rel="noopener noreferrer"
-                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0096ed]/5 hover:bg-[#0096ed]/10 text-[#0096ed] rounded-lg text-[11px] font-bold transition-colors"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-globlePrimary/5 hover:bg-globlePrimary/10 text-globlePrimary rounded-lg text-[11px] font-bold transition-colors"
                                 >
                                   <ExternalLink className="w-3 h-3" /> View
                                 </a>
