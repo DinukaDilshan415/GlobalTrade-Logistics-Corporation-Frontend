@@ -129,55 +129,6 @@ export const CustomsCompliance: React.FC = () => {
     }
   };
 
-
-  // const fetchCases = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     if (API_CONFIG.USE_REAL_API) {
-  //       const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_CASES}`, {
-  //         method: 'GET',
-  //         headers: DEFAULT_HEADERS
-  //       });
-  //       if (res.ok) setCases(await res.json());
-  //     } else {
-  //       await new Promise(resolve => setTimeout(resolve, 600));
-  //       setCases([
-  //         {
-  //           id: 1, caseNumber: 'CUS-2026-0891', shipmentId: 'SHP-10024',
-  //           customsValue: 45000.00, dutyAmount: 6750.00, riskLevel: 'HIGH',
-  //           submittedDate: '2026-08-15', deadline: '2026-08-22', 
-  //           clearedDate: null,
-  //           assignedOfficer: 'Officer J. Perera', 
-  //           remarks: 'High value electronics requiring mandatory chemical and battery declaration certs.',
-  //           status: 'REQUIRED_DOCUMENTS'
-  //         },
-  //         {
-  //           id: 2, caseNumber: 'CUS-2026-0892', shipmentId: 'SHP-10025',
-  //           customsValue: 12400.00, dutyAmount: 1860.00, riskLevel: 'LOW',
-  //           submittedDate: '2026-08-16', deadline: '2026-08-25', 
-  //           clearedDate: null,
-  //           assignedOfficer: 'Officer M. Silva', 
-  //           remarks: 'Standard textile freight. Awaiting initial document verification by assigned agent.',
-  //           status: 'PENDING_REVIEW'
-  //         },
-  //         {
-  //           id: 3, caseNumber: 'CUS-2026-0888', shipmentId: 'SHP-9022',
-  //           customsValue: 89000.00, dutyAmount: 13350.00, riskLevel: 'MEDIUM',
-  //           submittedDate: '2026-08-10', deadline: '2026-08-18', 
-  //           clearedDate: '2026-08-17',
-  //           assignedOfficer: 'Officer K. Fernando', 
-  //           remarks: 'All clearance permits verified. Tariffs paid in full.',
-  //           status: 'CLEARED'
-  //         }
-  //       ]);
-  //     }
-  //   } catch (err) {
-  //     console.error('Error fetching customs cases:', err);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   useEffect(() => {
     fetchCases();
   }, []);
@@ -243,33 +194,65 @@ export const CustomsCompliance: React.FC = () => {
     const formData = new FormData();
     formData.append('caseId', selectedCase.id.toString());
     formData.append('caseNumber', selectedCase.caseNumber);
-    Object.keys(uploadedFiles).forEach(key => {
-      if (uploadedFiles[key]) formData.append(key, uploadedFiles[key] as Blob);
+
+    REQUIRED_DOC_TYPES.forEach(doc => {
+      const file = uploadedFiles[doc.key];
+      if (file) {
+        formData.append(doc.key, file as Blob);
+      }
     });
 
+    const headers: Record<string, string> = {
+      'ngrok-skip-browser-warning': 'true',
+    };
+
+    if (token) {
+      headers['Authorization'] = 'Bearer ' + token;
+    } else {
+      console.warn('No auth token available; request will be sent without Authorization header');
+    }
+
     try {
-      if (API_CONFIG.USE_REAL_API) {
-        await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.SUBMIT_DOCUMENTS}`, {
-          method: 'POST',
-          body: formData
-        });
+      console.log([...formData.entries()]);
+      const response = await fetch(`${GLOBAL_BASE_URL}/custom/submitDocuments`, {
+        method: "POST",
+        credentials: "include",
+        headers,
+        body: formData
+      });
+
+      const json = await response.json();
+      console.log(json);
+      if (response.ok) {
+
+        if (json.status) {
+          setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, status: 'SUBMITTED' } : c));
+          setSelectedCase(prev => prev ? { ...prev, status: 'SUBMITTED' } : null);
+
+          toast.success(`All 6 documents verified. Case ${selectedCase.caseNumber} status updated to SUBMITTED.`);
+          setIsModalOpen(false);
+        } else {
+          toast.warn(json.message);
+        }
+
+      } else if (response.status == 400) {
+        console.log(response);
+        toast.error(json.message);
+      } else if (response.status == 401) {
+        console.log(response);
+        toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
       } else {
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate upload
-        console.log("Documents Submitted for Case:", selectedCase.caseNumber);
+        console.log(response);
+        toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
       }
-
-      // Optimistic UI Update
-      setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, status: 'SUBMITTED' } : c));
-      setSelectedCase(prev => prev ? { ...prev, status: 'SUBMITTED' } : null);
-
-      alert(`All 6 documents verified. Case ${selectedCase.caseNumber} status updated to SUBMITTED.`);
-      setIsModalOpen(false);
-    } catch (err) {
-      console.error("Error submitting documents:", err);
+    } catch (error) {
+      // tryRefresh();
+      toast.error("Something Wrong : " + error);
+      console.error("Error:", error);
     } finally {
       setIsSubmittingDocs(false);
     }
-  };
+  }
 
   // --- Helpers for Styling ---
   const getStatusBadge = (status: CaseStatus) => {
@@ -280,7 +263,7 @@ export const CustomsCompliance: React.FC = () => {
       case 'UNDER_REVIEW': return 'bg-purple-50 text-purple-700 border-purple-200';
       case 'CUSTOMS_REVIEW': return 'bg-emerald-500 text-white border-emerald-200';
       case 'REJECTED': return 'bg-red-50 text-red-700 border-red-200';
-      case "APPROVED" : return 'bg-lime-500 text-white border-lime-200';
+      case "APPROVED": return 'bg-lime-500 text-white border-lime-200';
       default: return 'bg-slate-100 text-slate-700 border-slate-200';
     }
   };
@@ -554,9 +537,9 @@ export const CustomsCompliance: React.FC = () => {
                               <label className="flex-1 cursor-pointer">
                                 <div className="flex items-center justify-center gap-2 py-2 px-3 bg-white border border-slate-200 hover:border-globlePrimary rounded-xl text-xs font-semibold text-slate-600 transition-colors shadow-sm">
                                   <Upload className="w-3.5 h-3.5 text-slate-400" />
-                                  <span className="truncate max-w-45">{file ? file.name : 'Choose PDF / DOCX...'}</span>
+                                  <span className="truncate max-w-45">{file ? file.name : 'Choose PDF...'}</span>
                                 </div>
-                                <input type="file" className="hidden" accept=".pdf,.docx,.png,.jpg" onChange={e => handleFileChange(doc.key, e.target.files?.[0] || null)} />
+                                <input type="file" className="hidden" accept=".pdf" onChange={e => handleFileChange(doc.key, e.target.files?.[0] || null)} />
                               </label>
                               {file && (
                                 <button type="button" onClick={() => handleFileChange(doc.key, null)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><X className="w-4 h-4" /></button>
