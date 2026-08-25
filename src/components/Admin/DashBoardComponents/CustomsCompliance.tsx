@@ -145,33 +145,75 @@ export const CustomsCompliance: React.FC = () => {
     });
     setExistingDocuments(null);
 
-    // If status is NOT 'REQUIRED_DOCUMENTS', fetch the already uploaded documents
     if (c.status !== 'DOCUMENTS_REQUIRED') {
       setIsFetchingDocs(true);
       try {
-        if (API_CONFIG.USE_REAL_API) {
-          const res = await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.GET_CASE_DOCUMENTS}${c.id}`, {
-            method: 'GET',
-            headers: DEFAULT_HEADERS
-          });
-          if (res.ok) setExistingDocuments(await res.json());
+        const headers: Record<string, string> = {
+          ...DEFAULT_HEADERS,
+        };
+
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
         } else {
-          // SIMULATION: Simulate fetching document URLs from the backend
-          await new Promise(resolve => setTimeout(resolve, 800));
-          setExistingDocuments({
-            commercialInvoice: 'https://example.com/docs/inv_123.pdf',
-            certOfOrigin: 'https://example.com/docs/coo_123.pdf',
-            permit: 'https://example.com/docs/permit_123.pdf',
-            insuranceCert: 'https://example.com/docs/ins_123.pdf',
-            customsDeclaration: 'https://example.com/docs/dec_123.pdf',
-            otherDocs: 'https://example.com/docs/others_123.pdf'
-          });
+          console.warn('No auth token available; request will be sent without Authorization header');
         }
-      } catch (err) {
-        console.error('Error fetching existing documents:', err);
+
+        const response = await fetch(`${GLOBAL_BASE_URL}/custom/getDocuments/${c.id}`, {
+          method: "GET",
+          credentials: "include",
+          headers,
+        });
+
+        if (response.ok) {
+          const json = await response.json();
+          console.log(json);
+
+          setExistingDocuments(json)
+
+        } else if (response.status == 401) {
+          console.log(response);
+          tryRefresh();
+        } else {
+          console.log(response);
+          toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
+        }
+      } catch (error) {
+        toast.error("Something Wrong : " + error);
+        console.error("Error:", error);
       } finally {
         setIsFetchingDocs(false);
       }
+    }
+  };
+
+  const openSecurePdf = async (pdfUrl: string) => {
+    try {
+
+      const response = await fetch(pdfUrl, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch document');
+
+      const rawBlob = await response.blob();
+
+      const pdfBlob = new Blob([rawBlob], { type: 'application/pdf' });
+
+      const localTabUrl = URL.createObjectURL(pdfBlob);
+
+      console.log('Opening PDF in new tab:', localTabUrl);
+
+      window.open(localTabUrl, '_blank');
+
+      setTimeout(() => URL.revokeObjectURL(localTabUrl), 10000);
+
+    } catch (error) {
+      console.error('Error opening PDF:', error);
     }
   };
 
@@ -586,7 +628,7 @@ export const CustomsCompliance: React.FC = () => {
                               </div>
                               {docUrl ? (
                                 <a
-                                  href={docUrl}
+                                  onClick={() => openSecurePdf(`${GLOBAL_BASE_URL}${docUrl}`)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-1.5 px-3 py-1.5 bg-globlePrimary/5 hover:bg-globlePrimary/10 text-globlePrimary rounded-lg text-[11px] font-bold transition-colors"
