@@ -10,6 +10,7 @@ import VendorAccountRequest from "../components/user/VendorAccountRequest";
 import VendorProfile from "../components/user/VendorProfile";
 import MainApplication from "../components/Admin/MainApplication";
 import VendorShipments from "../components/user/VendorShipments";
+import CustomsAgentWorkspace from "../components/user/CustomsAgentWorkspace";
 
 const router = createBrowserRouter([
   {
@@ -68,11 +69,19 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
-   {
+  {
     path: "/shipments",
     element: (
       <ProtectedRoute requiredRoles={["customer"]}>
         <VendorShipments />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/customs-account",
+    element: (
+      <ProtectedRoute requiredRoles={["customs_agent"]}>
+        <CustomsAgentWorkspace />
       </ProtectedRoute>
     ),
   },
