@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
     ShieldCheck, Search, FileText, DollarSign, ArrowRight,
     X, Loader2, Eye, ExternalLink, Calculator,
-    ShieldAlert, FileCheck, Package, MapPin,
-    Percent, Hash
+    ShieldAlert, FileCheck, Package,
+    Percent, Hash, Clock
 } from 'lucide-react';
 import { Header } from '../Header';
 import { Footer } from '../Footer';
@@ -11,18 +11,9 @@ import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from '../../api/client';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
-const API_CONFIG = {
-    USE_REAL_API: false,
-    ENDPOINTS: {
-        GET_AGENT_CASES: '/agent/customs/cases',
-        GET_CASE_DOCUMENTS: '/agent/customs/cases/documents/',
-        SUBMIT_ASSESSMENT: '/agent/customs/cases/assess'
-    }
-};
-
 // --- Type Definitions ---
 type RiskLevel = 'UNASSIGNED' | 'LOW' | 'MEDIUM' | 'HIGH';
-type CaseStatus = 'UNDER_REVIEW' | 'REQUIRED_DOCUMENTS' | 'SUBMITTED' | 'CLEARED' | 'REJECTED';
+type CaseStatus = 'UNDER_REVIEW' | 'REQUIRED_DOCUMENTS' | 'SUBMITTED' | 'CLEARED' | 'REJECTED' | 'APPROVED';
 
 interface CustomsCase {
     id: number;
@@ -61,6 +52,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [statusFilter, setStatusFilter] = useState<string>('ALL');
+    const [now, setNow] = useState<number>(Date.now());
 
     // Assessment Modal State
     const [selectedCase, setSelectedCase] = useState<CustomsCase | null>(null);
@@ -79,7 +71,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
         selectedHsCodeRate: 0,
         riskLevel: 'UNASSIGNED' as RiskLevel,
         remarks: '',
-        status: 'CLEARED' as CaseStatus
+        status: 'APPROVED' as CaseStatus
     });
 
     // Calculate totals dynamically
@@ -108,6 +100,11 @@ export const CustomsAgentWorkspace: React.FC = () => {
             console.log(e);
         }
     };
+
+    useEffect(() => {
+        const timer = window.setInterval(() => setNow(Date.now()), 60000);
+        return () => window.clearInterval(timer);
+    }, []);
 
     // --- 1. Fetch Cases ---
     const fetchCases = async () => {
@@ -171,7 +168,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
             selectedHsCodeRate: c.dutyAmount > 0 && c.customsValue > 0 ? (c.dutyAmount / c.customsValue) * 100 : 0,
             riskLevel: c.riskLevel !== 'UNASSIGNED' ? c.riskLevel : 'UNASSIGNED',
             remarks: c.remarks || '',
-            status: c.status === 'SUBMITTED' ? 'CLEARED' : c.status
+            status: c.status === 'UNDER_REVIEW' ? 'APPROVED' : c.status
         });
 
         if (c.status == 'SUBMITTED') {
@@ -307,30 +304,64 @@ export const CustomsAgentWorkspace: React.FC = () => {
             status: valuation.status
         };
 
+        const headers: Record<string, string> = {
+            ...DEFAULT_HEADERS,
+        };
+
+        if (token) {
+            headers['Authorization'] = 'Bearer ' + token;
+        } else {
+            console.warn('No auth token available; request will be sent without Authorization header');
+        }
+
+        console.log(payload);
+
         try {
-            if (API_CONFIG.USE_REAL_API) {
-                await fetch(`${GLOBAL_BASE_URL}${API_CONFIG.ENDPOINTS.SUBMIT_ASSESSMENT}`, {
-                    method: 'POST', headers: DEFAULT_HEADERS, body: JSON.stringify(payload)
-                });
+            console.log(payload);
+            const response = await fetch(`${GLOBAL_BASE_URL}/custom/updateCaseDecision`, {
+                method: "POST",
+                credentials: "include",
+                headers,
+                body: JSON.stringify(payload)
+            });
+
+            const json = await response.json();
+            console.log(json);
+            if (response.ok) {
+
+                if (json.status) {
+                    setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, ...payload } : c));
+                    toast.success(`Case ${selectedCase.caseNumber} Decision Updated Successfully!`);
+                    setIsModalOpen(false);
+                } else {
+                    toast.warn(json.message);
+                }
+
+            } else if (response.status == 400) {
+                console.log(response);
+                toast.error(json.message);
+            } else if (response.status == 401) {
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
             } else {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.log(response);
+                toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
             }
-            setCases(prev => prev.map(c => c.id === selectedCase.id ? { ...c, ...payload } : c));
-            alert(`Case ${selectedCase.caseNumber} assessment submitted successfully!`);
-            setIsModalOpen(false);
-        } catch (err) {
-            console.error("Error submitting assessment:", err);
+        } catch (error) {
+            toast.error("Something Wrong : " + error);
+            console.error("Error:", error);
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }
 
     // --- UI Helpers ---
     const getStatusBadge = (status: CaseStatus) => {
         switch (status) {
             case 'REQUIRED_DOCUMENTS': return 'bg-amber-50 text-amber-700 border-amber-200';
             case 'SUBMITTED': return 'bg-globlePrimary/10 text-globlePrimary border-globlePrimary/20';
-            case 'CLEARED': return 'bg-globleSecondary/20 text-lime-700 border-globleSecondary/40';
+            case 'APPROVED': return 'bg-globleSecondary/20 text-lime-700 border-globleSecondary/40';
+            case 'CLEARED': return 'bg-lime-50 text-lime-700 border-lime-200';
             case 'UNDER_REVIEW': return 'bg-purple-50 text-purple-700 border-purple-200';
             case 'REJECTED': return 'bg-red-50 text-red-700 border-red-200';
             default: return 'bg-slate-100 text-slate-700 border-slate-200';
@@ -344,6 +375,85 @@ export const CustomsAgentWorkspace: React.FC = () => {
             case 'LOW': return 'bg-globleSecondary text-slate-900 shadow-sm';
             case 'UNASSIGNED': return 'bg-slate-200 text-slate-500';
         }
+    };
+
+    const getDeadlineMeta = (deadline: string | null | undefined, status: CaseStatus, currentTime: number = Date.now()) => {
+        const isActiveReviewStatus = status === 'SUBMITTED' || status === 'UNDER_REVIEW';
+
+        if (!isActiveReviewStatus) {
+            return {
+                text: deadline || 'Not set',
+                countdownLabel: 'Not active',
+                isUrgent: false,
+                isPastDue: false,
+                classes: 'bg-slate-100 text-slate-600 border-slate-200'
+            };
+        }
+
+        if (!deadline) {
+            return {
+                text: 'Not set',
+                countdownLabel: 'No deadline',
+                isUrgent: false,
+                isPastDue: false,
+                classes: 'bg-slate-100 text-slate-600 border-slate-200'
+            };
+        }
+
+        const parsedDate = new Date(deadline);
+        if (Number.isNaN(parsedDate.getTime())) {
+            return {
+                text: deadline,
+                countdownLabel: 'Review date',
+                isUrgent: false,
+                isPastDue: false,
+                classes: 'bg-slate-100 text-slate-600 border-slate-200'
+            };
+        }
+
+        const diffMs = parsedDate.getTime() - currentTime;
+        const totalHours = diffMs / (1000 * 60 * 60);
+        const isPastDue = diffMs <= 0;
+        const isUrgent = !isPastDue && totalHours <= 24;
+
+        const hours = Math.max(0, Math.floor(Math.abs(diffMs) / (1000 * 60 * 60)));
+        const minutes = Math.max(0, Math.floor((Math.abs(diffMs) / (1000 * 60)) % 60));
+
+        const formattedDate = parsedDate.toLocaleString(undefined, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
+
+        if (isPastDue) {
+            return {
+                text: formattedDate,
+                countdownLabel: `Overdue by ${hours}h ${minutes}m`,
+                isUrgent: true,
+                isPastDue: true,
+                classes: 'bg-red-50 text-red-700 border-red-200 shadow-sm shadow-red-200/40'
+            };
+        }
+
+        if (isUrgent) {
+            return {
+                text: formattedDate,
+                countdownLabel: `Due in ${hours}h ${minutes}m`,
+                isUrgent: true,
+                isPastDue: false,
+                classes: 'bg-red-50 text-red-700 border-red-200 shadow-sm shadow-red-200/40'
+            };
+        }
+
+        return {
+            text: formattedDate,
+            countdownLabel: 'On schedule',
+            isUrgent: false,
+            isPastDue: false,
+            classes: 'bg-slate-100 text-slate-600 border-slate-200'
+        };
     };
 
     const filteredCases = cases.filter(c => {
@@ -380,6 +490,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
                                     <option value="ALL">All Statuses</option>
                                     <option value="SUBMITTED">Ready for Review (Submitted)</option>
                                     <option value="REQUIRED_DOCUMENTS">Awaiting Vendor Docs</option>
+                                    <option value="APPROVED">Approved</option>
                                     <option value="CLEARED">Cleared</option>
                                 </select>
                             </div>
@@ -399,6 +510,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
                                             <th className="p-4">Cargo Description</th>
                                             <th className="p-4">Assessed Value</th>
                                             <th className="p-4">Risk Profile</th>
+                                            <th className="p-4">Deadline</th>
                                             <th className="p-4">Status</th>
                                             <th className="p-4 pr-6 text-right">Action</th>
                                         </tr>
@@ -426,6 +538,22 @@ export const CustomsAgentWorkspace: React.FC = () => {
                                                 </td>
                                                 <td className="p-4">
                                                     <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider ${getRiskBadge(c.riskLevel)}`}>{c.riskLevel}</span>
+                                                </td>
+                                                <td className="p-4">
+                                                    {(() => {
+                                                        const deadlineMeta = getDeadlineMeta(c.deadline, c.status, now);
+                                                        return (
+                                                            <div className={`inline-flex flex-col gap-1 rounded-xl border px-2.5 py-1.5 text-left ${deadlineMeta.classes}`}>
+                                                                <div className="flex items-center gap-1.5 text-[11px] font-semibold">
+                                                                    <Clock className={`w-3.5 h-3.5 ${deadlineMeta.isUrgent ? 'text-red-600' : 'text-slate-400'}`} />
+                                                                    <span>{deadlineMeta.text}</span>
+                                                                </div>
+                                                                <span className="text-[10px] font-black uppercase tracking-wider">
+                                                                    {deadlineMeta.countdownLabel}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })()}
                                                 </td>
                                                 <td className="p-4">
                                                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusBadge(c.status)}`}>{c.status.replace('_', ' ')}</span>
@@ -485,6 +613,23 @@ export const CustomsAgentWorkspace: React.FC = () => {
                                             <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm grid grid-cols-2 gap-4">
                                                 <div><p className="text-[10px] font-bold text-slate-400 uppercase">Declared Description</p><p className="text-sm font-bold text-slate-900">{selectedCase.itemDescription}</p></div>
                                                 <div><p className="text-[10px] font-bold text-slate-400 uppercase">Gross Weight</p><p className="text-sm font-bold text-slate-900">{selectedCase.weight}</p></div>
+                                                <div className="col-span-2">
+                                                    {(() => {
+                                                        const deadlineMeta = getDeadlineMeta(selectedCase.deadline, selectedCase.status, now);
+                                                        return (
+                                                            <div className={`rounded-2xl border px-3 py-2.5 ${deadlineMeta.classes}`}>
+                                                                <p className="text-[10px] font-bold uppercase tracking-wider">Inspection Deadline</p>
+                                                                <div className="mt-1 flex items-center gap-2">
+                                                                    <Clock className={`w-3.5 h-3.5 ${deadlineMeta.isUrgent ? 'text-red-600' : 'text-slate-400'}`} />
+                                                                    <div>
+                                                                        <p className="text-sm font-bold">{deadlineMeta.text}</p>
+                                                                        <p className="text-[10px] font-black uppercase tracking-wider mt-0.5">{deadlineMeta.countdownLabel}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -617,8 +762,8 @@ export const CustomsAgentWorkspace: React.FC = () => {
                                         <div className="space-y-1.5">
                                             <label className="text-xs font-extrabold text-slate-900 uppercase">Final Decision / Status Update</label>
                                             <select required value={valuation.status} onChange={e => setValuation({ ...valuation, status: e.target.value as CaseStatus })} className="w-full px-3 py-3 bg-white border border-slate-300 rounded-lg text-sm font-bold focus:border-globlePrimary outline-none shadow-sm cursor-pointer">
-                                                <option value="CLEARED">✅ Approved & Cleared</option>
-                                                <option value="REQUIRED_DOCUMENTS">⚠️ Reject - Require New Documents</option>
+                                                <option value="APPROVED">✅ Approved & Cleared</option>
+                                                <option value="DOCUMENTS_REQUIRED">⚠️ Reject - Require New Documents</option>
                                                 <option value="REJECTED">❌ Cargo Rejected / Confiscated</option>
                                             </select>
                                         </div>
