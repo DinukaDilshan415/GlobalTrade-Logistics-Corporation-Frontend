@@ -10,6 +10,7 @@ import VendorsManagement from './DashBoardComponents/VendorsManagement';
 import AdminShipments from './DashBoardComponents/AdminShipments';
 import InventoryManagement from './DashBoardComponents/InventoryManagement';
 import CustomsCompliance from './DashBoardComponents/CustomsCompliance';
+import UsersAndRoles from './DashBoardComponents/UsersAndRoles';
 
 // Define available routes matching the sidebar
 type Route =
@@ -115,6 +116,12 @@ export const MainApplication: React.FC = () => {
         </div>
     );
 
+    const UsersAndRolesView = () => (
+        <div className="animate-in fade-in duration-300">
+            <UsersAndRoles />
+        </div>
+    );
+
     const ExceptionsView = () => (
         <div className="animate-in fade-in duration-300">
             <PageHeader title="System Exceptions" description="EJB application error logs, timer service failures, and recovery actions." />
@@ -177,11 +184,11 @@ export const MainApplication: React.FC = () => {
             case 'inventory': return <InventoryView />;
             case 'exceptions': return <ExceptionsView />;
             case 'vendors': return <VendorView />;
-            case 'customs': return <CustomsComplianceView/>;
+            case 'customs': return <CustomsComplianceView />;
             case 'routes': return <GenericView title="Route Optimization" icon={Map} />;
             case 'alerts': return <GenericView title="System Alerts" icon={Bell} />;
             case 'audit-logs': return <GenericView title="Audit & Security Logs" icon={ScrollText} />;
-            case 'users': return <GenericView title="Users & Roles RBAC" icon={Users} />;
+            case 'users': return <UsersAndRolesView />;
             case 'monitoring': return <GenericView title="EJB System Monitoring" icon={Activity} />;
             case 'performance': return <GenericView title="Server Performance" icon={BarChart2} />;
             case 'profile': return <GenericView title="Admin Profile" icon={User} />;

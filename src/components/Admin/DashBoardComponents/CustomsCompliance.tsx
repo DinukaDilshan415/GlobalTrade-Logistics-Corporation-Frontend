@@ -10,16 +10,6 @@ import { toast } from 'react-toastify';
 import { DEFAULT_HEADERS, GLOBAL_BASE_URL } from '../../../api/client';
 import { useAuth } from '../../context/AuthContext';
 
-const API_CONFIG = {
-  USE_REAL_API: true,
-  ENDPOINTS: {
-    GET_CASES: '/customs/cases',
-    GET_CASE_DETAILS: '/customs/cases/',
-    SUBMIT_DOCUMENTS: '/customs/cases/submit-documents',
-    GET_CASE_DOCUMENTS: '/customs/cases/documents/'
-  }
-};
-
 type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | '-';
 type CaseStatus = 'UNDER_REVIEW' | 'DOCUMENTS_REQUIRED' | 'SUBMITTED' | 'CLEARED' | 'REJECTED' | 'APPROVED' | 'CUSTOMS_REVIEW';
 
