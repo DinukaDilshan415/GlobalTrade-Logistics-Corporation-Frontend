@@ -20,7 +20,7 @@ export const Header: React.FC = () => {
   
   const accountRef = useRef<HTMLDivElement>(null);
 
-  const { token, logout } = useAuth();
+  const { token, roles, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -111,13 +111,15 @@ export const Header: React.FC = () => {
                       <UserCircle className="h-4 w-4 text-slate-400" />
                       <span>My Profile</span>
                     </a>
-                    <a
-                      href="#address-book"
+                    {roles.includes('customs_agent') && (
+                        <a
+                      href="/customs-account"
                       className="flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:text-globlePrimary hover:bg-globlePrimary/5 rounded-xl transition-colors"
                     >
                       <BookUser className="h-4 w-4 text-slate-400" />
-                      <span>Address Book</span>
+                      <span>Customs Account</span>
                     </a>
+                    )}
                   </div>
 
                   {/* Highlight CTA in Dropdown */}
