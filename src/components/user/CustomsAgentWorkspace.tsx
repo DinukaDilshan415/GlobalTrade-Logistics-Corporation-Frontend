@@ -256,7 +256,7 @@ export const CustomsAgentWorkspace: React.FC = () => {
             toast.error("Something Wrong : " + error);
             console.error("Error:", error);
         }
-    }
+    };
 
     const openSecurePdf = async (pdfUrl: string) => {
         try {
