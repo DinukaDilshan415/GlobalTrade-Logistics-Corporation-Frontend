@@ -11,6 +11,7 @@ import AdminShipments from './DashBoardComponents/AdminShipments';
 import InventoryManagement from './DashBoardComponents/InventoryManagement';
 import CustomsCompliance from './DashBoardComponents/CustomsCompliance';
 import UsersAndRoles from './DashBoardComponents/UsersAndRoles';
+import AlertsCenter from './DashBoardComponents/AlertsCenter';
 
 // Define available routes matching the sidebar
 type Route =
@@ -168,6 +169,12 @@ export const MainApplication: React.FC = () => {
         </div>
     );
 
+    const AlertView = () => (
+        <div className="animate-in fade-in duration-300">
+            <AlertsCenter />
+        </div>
+    );
+
     const GenericView = ({ title, icon: Icon }: { title: string, icon: any }) => (
         <div className="flex flex-col items-center justify-center h-96 animate-in zoom-in-95 duration-300 bg-white rounded-3xl border border-slate-200 border-dashed">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4"><Icon className="w-10 h-10 text-slate-300" /></div>
@@ -186,7 +193,7 @@ export const MainApplication: React.FC = () => {
             case 'vendors': return <VendorView />;
             case 'customs': return <CustomsComplianceView />;
             case 'routes': return <GenericView title="Route Optimization" icon={Map} />;
-            case 'alerts': return <GenericView title="System Alerts" icon={Bell} />;
+            case 'alerts': return <AlertView />;
             case 'audit-logs': return <GenericView title="Audit & Security Logs" icon={ScrollText} />;
             case 'users': return <UsersAndRolesView />;
             case 'monitoring': return <GenericView title="EJB System Monitoring" icon={Activity} />;
