@@ -12,6 +12,9 @@ import InventoryManagement from './DashBoardComponents/InventoryManagement';
 import CustomsCompliance from './DashBoardComponents/CustomsCompliance';
 import UsersAndRoles from './DashBoardComponents/UsersAndRoles';
 import AlertsCenter from './DashBoardComponents/AlertsCenter';
+import AuditLogs from './DashBoardComponents/AuditLogs';
+import SystemMonitoring from './DashBoardComponents/SystemMonitoring';
+import SystemPerformance from './DashBoardComponents/SystemPerformance';
 
 // Define available routes matching the sidebar
 type Route =
@@ -175,6 +178,24 @@ export const MainApplication: React.FC = () => {
         </div>
     );
 
+    const LogsView = () => (
+        <div className="animate-in fade-in duration-300">
+            <AuditLogs />
+        </div>
+    );
+
+    const SystemView = () => (
+        <div className="animate-in fade-in duration-300">
+            <SystemMonitoring />
+        </div>
+    );
+
+    const PerformanceView = () => (
+        <div className="animate-in fade-in duration-300">
+            <SystemPerformance />
+        </div>
+    );
+
     const GenericView = ({ title, icon: Icon }: { title: string, icon: any }) => (
         <div className="flex flex-col items-center justify-center h-96 animate-in zoom-in-95 duration-300 bg-white rounded-3xl border border-slate-200 border-dashed">
             <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4"><Icon className="w-10 h-10 text-slate-300" /></div>
@@ -194,10 +215,10 @@ export const MainApplication: React.FC = () => {
             case 'customs': return <CustomsComplianceView />;
             case 'routes': return <GenericView title="Route Optimization" icon={Map} />;
             case 'alerts': return <AlertView />;
-            case 'audit-logs': return <GenericView title="Audit & Security Logs" icon={ScrollText} />;
+            case 'audit-logs': return <LogsView />;
             case 'users': return <UsersAndRolesView />;
-            case 'monitoring': return <GenericView title="EJB System Monitoring" icon={Activity} />;
-            case 'performance': return <GenericView title="Server Performance" icon={BarChart2} />;
+            case 'monitoring': return <SystemView />;
+            case 'performance': return <PerformanceView />;
             case 'profile': return <GenericView title="Admin Profile" icon={User} />;
             default: return <DashboardView />;
         }
