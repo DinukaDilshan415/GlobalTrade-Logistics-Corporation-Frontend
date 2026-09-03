@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS `admin` (
   CONSTRAINT `fk_admin_roles1` FOREIGN KEY (`roles_id`) REFERENCES `roles` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.admin: ~1 rows (approximately)
+-- Dumping data for table globaltrade_db.admin: ~0 rows (approximately)
 REPLACE INTO `admin` (`id`, `username`, `password_hash`, `created_at`, `roles_id`) VALUES
 	(1, 'admin123', '$2a$12$jCtFhA.reaBT0AZ/OL4x0Ovm.Y.iv1vwZHflbkW4Pv/KuYrsaxcdK', '2026-08-18 03:14:36', 1);
 
@@ -63,9 +63,32 @@ CREATE TABLE IF NOT EXISTS `admin_profile` (
   CONSTRAINT `fk_admin_profile_user_status1` FOREIGN KEY (`user_status_id`) REFERENCES `user_status` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.admin_profile: ~1 rows (approximately)
+-- Dumping data for table globaltrade_db.admin_profile: ~0 rows (approximately)
 REPLACE INTO `admin_profile` (`id`, `name`, `admin_id`, `user_status_id`, `created_at`, `updated_at`) VALUES
 	(1, 'Super Admin', 1, 1, '2026-08-26 05:39:06', '2026-08-26 05:39:09');
+
+-- Dumping structure for table globaltrade_db.alerts
+CREATE TABLE IF NOT EXISTS `alerts` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `alert_number` varchar(45) NOT NULL,
+  `type` varchar(45) NOT NULL,
+  `severity` varchar(45) NOT NULL,
+  `message` text NOT NULL,
+  `entity_type` varchar(45) NOT NULL,
+  `entity_id` varchar(45) NOT NULL,
+  `status` varchar(45) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `read_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+
+-- Dumping data for table globaltrade_db.alerts: ~4 rows (approximately)
+REPLACE INTO `alerts` (`id`, `alert_number`, `type`, `severity`, `message`, `entity_type`, `entity_id`, `status`, `created_at`, `read_at`) VALUES
+	(1, 'ALT-635126', 'SHIPMENT_DELAY', 'HIGH', 'Shipment SHP-157861 is Delayed', 'SHIPMENT', 'SHP-157861', 'ACKNOWLEDGED', '2026-08-27 05:40:00', '2026-08-27 07:47:40'),
+	(2, 'ALT-206348', 'CUSTOMS_DEADLINE', 'NOTICE', 'Customs case C-260823-040651 requires attention. Deadline is 2026-08-27T04:20:12', 'CUSTOMS', 'C-260823-040651', 'UNREAD', '2026-08-27 05:40:00', '2026-08-27 05:40:00'),
+	(3, 'ALT-452587', 'SHIPMENT_DELAY', 'HIGH', 'Shipment SHP-495688 is Delayed', 'SHIPMENT', 'SHP-495688', 'UNREAD', '2026-08-30 10:30:00', '2026-08-30 10:30:00'),
+	(4, 'ALT-533342', 'SHIPMENT_DELAY', 'HIGH', 'Shipment SHP-990312 is Delayed', 'SHIPMENT', 'SHP-990312', 'UNREAD', '2026-08-30 10:30:00', '2026-08-30 10:30:00'),
+	(5, 'ALT-274914', 'INVENTORY_SHORTAGE', 'CRITICAL', '8543.23.01 - TV is below the minimum stock level in GlobalTrade Shanghai Pudong Hub', 'INVENTORY', '3', 'UNREAD', '2026-09-03 18:30:00', '2026-09-03 18:30:00');
 
 -- Dumping structure for table globaltrade_db.country
 CREATE TABLE IF NOT EXISTS `country` (
@@ -148,13 +171,14 @@ CREATE TABLE IF NOT EXISTS `customs_cases` (
   CONSTRAINT `fk_customs_cases_custom_agent1` FOREIGN KEY (`custom_agent_id`) REFERENCES `custom_agent` (`id`),
   CONSTRAINT `fk_customs_cases_custom_status1` FOREIGN KEY (`custom_status_id`) REFERENCES `custom_status` (`id`),
   CONSTRAINT `fk_customs_cases_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
 
 -- Dumping data for table globaltrade_db.customs_cases: ~3 rows (approximately)
 REPLACE INTO `customs_cases` (`id`, `case_number`, `shipment_id`, `risk_level`, `customs_value`, `estimated_duty`, `deadline`, `submitted_at`, `response_at`, `remarks`, `custom_agent_id`, `custom_status_id`) VALUES
 	(1, 'C-260825-040451', 4, '-', 0, 0, '2026-08-27 04:04:51', '2026-08-25 04:04:51', '2026-08-25 04:04:51', '-', NULL, 1),
 	(2, 'C-260823-040651', 1, 'MEDIUM', 1160, 174, '2026-08-27 04:20:12', '2026-08-23 04:20:18', '2026-08-26 14:12:18', 'special clearance required', 1, 5),
-	(3, 'C-260822-065137', 3, 'LOW', 520, 78, '2026-08-26 04:21:30', '2026-08-22 04:21:44', '2026-08-26 13:47:18', 'no issue to clear', 1, 5);
+	(3, 'C-260822-065137', 3, 'LOW', 520, 78, '2026-08-26 04:21:30', '2026-08-22 04:21:44', '2026-08-26 13:47:18', 'no issue to clear', 1, 5),
+	(4, 'C-260903-124808', 5, '-', 0, 0, '2026-09-05 12:48:09', '2026-09-03 12:48:09', '2026-09-03 12:48:09', '-', NULL, 1);
 
 -- Dumping structure for table globaltrade_db.customs_documents
 CREATE TABLE IF NOT EXISTS `customs_documents` (
@@ -219,7 +243,7 @@ CREATE TABLE IF NOT EXISTS `custom_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.custom_status: ~7 rows (approximately)
+-- Dumping data for table globaltrade_db.custom_status: ~6 rows (approximately)
 REPLACE INTO `custom_status` (`id`, `status`) VALUES
 	(1, 'DOCUMENTS_REQUIRED'),
 	(2, 'SUBMITTED'),
@@ -256,14 +280,16 @@ CREATE TABLE IF NOT EXISTS `inventory` (
   PRIMARY KEY (`id`),
   KEY `fk_inventory_warehouses1_idx` (`warehouses_id`),
   CONSTRAINT `fk_inventory_warehouses1` FOREIGN KEY (`warehouses_id`) REFERENCES `warehouses` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb3;
 
 -- Dumping data for table globaltrade_db.inventory: ~4 rows (approximately)
 REPLACE INTO `inventory` (`id`, `product_name`, `hs_code`, `quantity`, `unit_value`, `warehouses_id`) VALUES
 	(1, 'Monitors', '8507.60.00', 54, 120, 3),
 	(2, 'Smartwatch', '8544.70.00', 75, 55, 3),
-	(3, 'TV', '8543.23.01', 24, 950, 9),
-	(5, 'Printers', '8722.02.00', 50, 145, 13);
+	(3, 'TV', '8543.23.01', 19, 950, 9),
+	(5, 'Printers', '8722.02.00', 50, 145, 13),
+	(6, 'Powerbanks', '8243.26.07', 201, 30, 11),
+	(11, 'Microphones', '8574.72.88', 60, 25, 14);
 
 -- Dumping structure for table globaltrade_db.refresh_token
 CREATE TABLE IF NOT EXISTS `refresh_token` (
@@ -274,13 +300,10 @@ CREATE TABLE IF NOT EXISTS `refresh_token` (
   `token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK6t7skxndr9jtm3ckw71g75tfl` (`email`),
-  UNIQUE KEY `UK_r4k4edos30bx9neoq81mdvwph` (`token`),
-  UNIQUE KEY `UKr4k4edos30bx9neoq81mdvwph` (`token`)
+  UNIQUE KEY `UK_r4k4edos30bx9neoq81mdvwph` (`token`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.refresh_token: ~1 rows (approximately)
-REPLACE INTO `refresh_token` (`id`, `createdAt`, `email`, `expiryAt`, `token`) VALUES
-	(12, '2026-08-26 08:46:20.260332', 'inspiring@gmail.com', '2026-09-02 08:46:20.260332', 'f2d9b13af6b74289aebf9fb5c3ec82645cd4d6b0cb09421da4eb109c473bffb3');
+-- Dumping data for table globaltrade_db.refresh_token: ~0 rows (approximately)
 
 -- Dumping structure for table globaltrade_db.roles
 CREATE TABLE IF NOT EXISTS `roles` (
@@ -323,13 +346,14 @@ CREATE TABLE IF NOT EXISTS `shipment` (
   CONSTRAINT `fk_shipment_admin1` FOREIGN KEY (`admin_id`) REFERENCES `admin` (`id`),
   CONSTRAINT `fk_shipment_country1` FOREIGN KEY (`origin_country_id`) REFERENCES `country` (`id`),
   CONSTRAINT `fk_shipment_country2` FOREIGN KEY (`dest_country_id`) REFERENCES `country` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment: ~3 rows (approximately)
+-- Dumping data for table globaltrade_db.shipment: ~2 rows (approximately)
 REPLACE INTO `shipment` (`id`, `shipment_id`, `carrier`, `expect_data`, `weight`, `description`, `origin_address`, `sender_name`, `sender_phone`, `dest_address`, `recipient_name`, `recipient_phone`, `created_at`, `updated_at`, `origin_country_id`, `dest_country_id`, `admin_id`) VALUES
 	(1, 'SHP-157861', 'DHL', '2026-08-26 00:00:00', 5, 'carefull', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Dinuka', '0762078415', '70568 Samantha Pass, Apt. 351, 6848, Tshwane, Limpopo, South Africa', 'Samantha', '0762078415', '2026-08-22 06:51:37', '2026-08-22 06:51:37', 38, 34, 1),
 	(3, 'SHP-495688', 'Global Air', '2026-08-30 00:00:00', 10, 'nothing special', 'Sri Lanka - GlobalTrade Katunayake Express', 'Global Trade Logistics Corporation', '0123456789', 'ul. Mazowiecka 45 m. 1200-052 Warszawa', 'Jan Kowalski', '48226543210', '2026-08-23 04:06:46', '2026-08-23 04:06:46', 38, 31, 1),
-	(4, 'SHP-990312', 'Global express', '2026-08-30 00:00:00', 16, 'handle carefully', 'China - GlobalTrade Shanghai Pudong Hub', 'Global Trade Logistics Corporation', '0123456789', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Chanuka', '0772323225', '2026-08-25 04:04:51', '2026-08-25 04:04:51', 7, 38, 1);
+	(4, 'SHP-990312', 'Global express', '2026-08-30 00:00:00', 16, 'handle carefully', 'China - GlobalTrade Shanghai Pudong Hub', 'Global Trade Logistics Corporation', '0123456789', 'No. 4/a Aluthgama, Dekinda, Nawalapitiya.', 'Chanuka', '0772323225', '2026-08-25 04:04:51', '2026-08-25 04:04:51', 7, 38, 1),
+	(5, 'SHP-248100', 'GlobalExpress', '2026-09-12 00:00:00', 50, 'Handle carefully', 'China - GlobalTrade Shanghai Pudong Hub', 'Global Trade Logistics Corporation', '0123456789', '44/1 Bharat Apartment, 4C 5th Main Road, Bangalore', 'Rajesh Kumar', '919876543210', '2026-09-03 12:48:09', '2026-09-03 12:48:09', 7, 14, 1);
 
 -- Dumping structure for table globaltrade_db.shipment_items
 CREATE TABLE IF NOT EXISTS `shipment_items` (
@@ -345,15 +369,16 @@ CREATE TABLE IF NOT EXISTS `shipment_items` (
   CONSTRAINT `fk_shipment_items_inventory1` FOREIGN KEY (`inventory_id`) REFERENCES `inventory` (`id`),
   CONSTRAINT `fk_shipment_items_ship_product1` FOREIGN KEY (`ship_product_id`) REFERENCES `ship_product` (`id`),
   CONSTRAINT `fk_shipment_items_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment_items: ~5 rows (approximately)
+-- Dumping data for table globaltrade_db.shipment_items: ~6 rows (approximately)
 REPLACE INTO `shipment_items` (`id`, `ship_product_id`, `inventory_id`, `quantity`, `shipment_id`) VALUES
 	(1, 5, NULL, 1, 1),
 	(2, 6, NULL, 1, 1),
 	(3, NULL, 1, 2, 3),
 	(4, NULL, 2, 4, 3),
-	(5, NULL, 3, 1, 4);
+	(5, NULL, 3, 1, 4),
+	(6, NULL, 3, 5, 5);
 
 -- Dumping structure for table globaltrade_db.shipment_progress
 CREATE TABLE IF NOT EXISTS `shipment_progress` (
@@ -368,15 +393,16 @@ CREATE TABLE IF NOT EXISTS `shipment_progress` (
   KEY `fk_shipment_progress_shipment1_idx` (`shipment_id`),
   CONSTRAINT `fk_shipment_progress_ship_status1` FOREIGN KEY (`ship_status_id`) REFERENCES `ship_status` (`id`),
   CONSTRAINT `fk_shipment_progress_shipment1` FOREIGN KEY (`shipment_id`) REFERENCES `shipment` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.shipment_progress: ~5 rows (approximately)
+-- Dumping data for table globaltrade_db.shipment_progress: ~3 rows (approximately)
 REPLACE INTO `shipment_progress` (`id`, `ship_status_id`, `location`, `description`, `shipment_id`, `created_at`) VALUES
 	(1, 1, 'From : Sri Lanka To : South Africa', 'Shipment Accepted By Global Trade Logistics Corporation', 1, '2026-08-22 06:51:37'),
 	(2, 4, 'GlobalTrade Katunayake Express', 'We are preparing your item for shipment', 1, '2026-08-22 10:10:24'),
 	(3, 5, 'katunayake airport', 'Your package is on its way', 1, '2026-08-22 10:38:21'),
 	(4, 1, 'GlobalTrade Katunayake Express - Sri Lanka', 'Shipment Accepted By Global Trade Logistics Corporation', 3, '2026-08-23 04:06:46'),
-	(5, 1, 'GlobalTrade Shanghai Pudong Hub - China', 'Shipment Accepted By Global Trade Logistics Corporation', 4, '2026-08-25 04:04:51');
+	(5, 1, 'GlobalTrade Shanghai Pudong Hub - China', 'Shipment Accepted By Global Trade Logistics Corporation', 4, '2026-08-25 04:04:51'),
+	(6, 1, 'GlobalTrade Shanghai Pudong Hub - China', 'Shipment Accepted By Global Trade Logistics Corporation', 5, '2026-09-03 12:48:09');
 
 -- Dumping structure for table globaltrade_db.ship_category
 CREATE TABLE IF NOT EXISTS `ship_category` (
@@ -438,12 +464,13 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`id`),
   KEY `fk_user_account_type_idx` (`account_type_id`),
   CONSTRAINT `fk_user_account_type` FOREIGN KEY (`account_type_id`) REFERENCES `account_type` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.user: ~2 rows (approximately)
+-- Dumping data for table globaltrade_db.user: ~3 rows (approximately)
 REPLACE INTO `user` (`id`, `username`, `email`, `password_hash`, `account_type_id`) VALUES
 	(1, 'Doris K. Thomas', 'doris@gmail.com', '$2a$12$10.VsrznjxWhyDz/N9ff8.Vf56E9UMbDeORFVOo6./sfGAVbGOCRS', 1),
-	(2, 'inspiringtorvalds8', 'inspiring@gmail.com', '$2a$12$8qqkEf/62u9BY4Mh1D9GDu.XF5XQPA5WQEWKSDOWIqKhNsLCDoR8K', 2);
+	(2, 'inspiringtorvalds8', 'inspiring@gmail.com', '$2a$12$8qqkEf/62u9BY4Mh1D9GDu.XF5XQPA5WQEWKSDOWIqKhNsLCDoR8K', 2),
+	(3, 'beyase2317', 'beyase2317@mediseat.com', '$2a$12$70RJ.rHtxdMygEY8goLoIO8Qcb2sOY5wOMQrB853hTz4VjUx7.lLa', 1);
 
 -- Dumping structure for table globaltrade_db.user_status
 CREATE TABLE IF NOT EXISTS `user_status` (
@@ -452,7 +479,7 @@ CREATE TABLE IF NOT EXISTS `user_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb3;
 
--- Dumping data for table globaltrade_db.user_status: ~3 rows (approximately)
+-- Dumping data for table globaltrade_db.user_status: ~2 rows (approximately)
 REPLACE INTO `user_status` (`id`, `status`) VALUES
 	(1, 'ACTIVE'),
 	(2, 'SUSPENDED'),

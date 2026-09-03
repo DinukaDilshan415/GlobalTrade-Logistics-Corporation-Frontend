@@ -9,8 +9,6 @@ import {
   CheckCircle2,
   ShieldCheck,
   UserCheck,
-  Globe2,
-  Package,
   Truck,
   ArrowLeft
 } from 'lucide-react';
@@ -126,7 +124,7 @@ export const LoginPage: React.FC = () => {
       } else if (response.status == 400) {
         toast.error(json.message);
       } else if (response.status == 401) {
-        toast.error(json.error);
+        toast.error(json.message);
       } else {
         console.log(response);
         toast.error("Error : " + response.status + ", " + response.statusText + ". Please try again");
